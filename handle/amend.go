@@ -9,39 +9,8 @@ import (
 )
 
 //GetAmendWords ... 按页获取
-func GetAmendWords(c *gin.Context) {
-	pageID, entry := 0, 0
-	var err error
-	strPageID, ok := c.GetQuery("page")
-	if ok {
-		pageID, err = strconv.Atoi(strPageID)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"code": 1, "msg": err.Error(), "data": nil})
-			return
-		}
-	}
-	strEntry, ok := c.GetQuery("entry")
-	if ok {
-		entry, err = strconv.Atoi(strEntry)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"code": 1, "msg": err.Error(), "data": nil})
-			return
-		}
-	}
-	if entry > 100 || entry <= 1 {
-		entry = 20
-	}
-	items, err := model.AmendModel.GetItemsByPage(pageID, entry)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "msg": err.Error(), "data": nil})
-		return
-	}
-	cnt, err := model.AmendModel.GetItemsCount()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "msg": err.Error(), "data": nil})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": gin.H{"items": items, "amount": cnt}})
+func HelloWord(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": gin.H{"name": "liqi ", "amount": 0}})
 }
 
 //SearchAmendWords ...
