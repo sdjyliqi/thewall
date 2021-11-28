@@ -1,6 +1,4 @@
 package utils
 
-//定义邮件合法性标记
-type LegalTag int8
-
-type Category int8
+var TimeFormat = "2006-01-02 15:04:05"
+var SMTP163Host = "smtp.163.com:25"

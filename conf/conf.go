@@ -42,6 +42,6 @@ func InitConfig(f string, v *Config) {
 
 //DefaultConfig .
 var DefaultConfig = Config{
-	DBMysql: "root:Bit0123456789!@tcp(114.55.139.105:3306)/email-center?charset=utf8mb4",
+	DBMysql: "thewall:0Thewall!2022@tcp(114.55.139.105:3306)/email-center?charset=utf8mb4",
 	RunPort: 15001,
 }
