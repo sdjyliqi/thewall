@@ -64,9 +64,9 @@ func (t IotCropType) GetItemByID(id int64) (*IotCropType, error) {
 //UpdateItemByID ... 根据数据ID，更新该条数据数据
 func (t IotCropType) UpdateItemByID(item *IotCropType) error {
 	cols := []string{"name", "code"}
-	_, err := utils.GetMysqlClient().Cols(cols...).Id(item.Id).Update(item)
+	_, err := utils.GetMysqlClient().Id(item.Id).Cols(cols...).Update(item)
 	if err != nil {
-		glog.Errorf("Update the item  from %s failed,err:%+v", item, t.TableName(), err)
+		glog.Errorf("Update the item %+v from %s failed,err:%+v", item, t.TableName(), err)
 		return err
 	}
 	return nil
