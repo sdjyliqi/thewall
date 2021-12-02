@@ -1,8 +1,13 @@
 package models
 
 import (
+	"email-center/utils"
+	"errors"
+	"github.com/golang/glog"
 	"time"
 )
+
+var IotDeviceEx IotDevice
 
 type IotDevice struct {
 	Id          int       `json:"id" xorm:"not null pk INT(11)"`
@@ -25,4 +30,52 @@ type IotDevice struct {
 
 func (t IotDevice) TableName() string {
 	return "iot_device"
+}
+
+//GetAllItems  ...获取全量数据
+func (t IotDevice) GetAllItems() ([]*IotDevice, error) {
+	var items []*IotDevice
+	err := utils.GetMysqlClient().Find(&items)
+	if err != nil {
+		glog.Errorf("The the items from %s failed,err:%+v", t.TableName(), err)
+		return nil, err
+	}
+	return items, nil
+}
+
+//GetItemsByPage  ...分页获取全量数据
+func (t IotDevice) GetItemsByPage(pageID int) ([]*IotDevice, error) {
+	if pageID < 0 {
+		return nil, errors.New("invalid-request")
+	}
+	var items []*IotDevice
+	pageCount := 100
+	err := utils.GetMysqlClient().Limit(pageCount, pageID*pageCount).Find(&items)
+	if err != nil {
+		glog.Errorf("The the items from %s failed,err:%+v", t.TableName(), err)
+		return nil, err
+	}
+	return items, nil
+}
+
+//GetItemByID ...根据ID获取对应某条记录
+func (t IotDevice) GetItemByID(id int64) (*IotDevice, error) {
+	var item *IotDevice
+	_, err := utils.GetMysqlClient().ID(id).Get(item)
+	if err != nil {
+		glog.Errorf("The the item by id %d from %s failed,err:%+v", id, t.TableName(), err)
+		return nil, err
+	}
+	return item, nil
+}
+
+//UpdateItemByID ... 根据数据ID，更新该条数据数据
+func (t IotDevice) UpdateItemByID(item *IotDevice) error {
+	cols := []string{"name", "code"}
+	_, err := utils.GetMysqlClient().Id(item.Id).Cols(cols...).Update(item)
+	if err != nil {
+		glog.Errorf("Update the item %+v from %s failed,err:%+v", item, t.TableName(), err)
+		return err
+	}
+	return nil
 }

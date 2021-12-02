@@ -7,18 +7,9 @@ import (
 	"strconv"
 )
 
-//HelloWord ... 测试
-func HelloWord(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": gin.H{"name": "liqi ", "amount": 0}})
-}
-
-//GetCropAllItems ... 获取crop全量数据
-func GetCropAllItems(c *gin.Context) {
-	//keywords, _ := c.GetQuery("idx")
-	//if keywords == "" {
-	//	c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
-	//}
-	items, err := models.IotCropEx.GetAllItems()
+//GetDeviceAllItems ... 获取device全量数据
+func GetDeviceAllItems(c *gin.Context) {
+	items, err := models.IotDeviceEx.GetAllItems()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "msg": err.Error(), "data": nil})
 		return
@@ -27,8 +18,8 @@ func GetCropAllItems(c *gin.Context) {
 	return
 }
 
-//GetCropItemsByPage ... 获取crop全量数据
-func GetCropItemsByPage(c *gin.Context) {
+//GetDeviceItemsByPage ... 分页获取device全量数据
+func GetDeviceItemsByPage(c *gin.Context) {
 	strPage, _ := c.GetQuery("page")
 	if strPage == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
@@ -39,7 +30,7 @@ func GetCropItemsByPage(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
 		return
 	}
-	items, err := models.IotCropEx.GetItemsByPage(pageId)
+	items, err := models.IotDeviceEx.GetItemsByPage(pageId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "msg": err.Error(), "data": nil})
 		return
