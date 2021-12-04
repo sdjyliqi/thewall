@@ -70,12 +70,11 @@ func (t IotDevice) GetItemByID(id int64) (*IotDevice, error) {
 }
 
 //UpdateItemByID ... 根据数据ID，更新该条数据数据
-func (t IotDevice) UpdateItemByID(item *IotDevice) error {
-	cols := []string{"name", "code"}
-	_, err := utils.GetMysqlClient().Id(item.Id).Cols(cols...).Update(item)
+func (t IotDevice) UpdateItemByID(item *IotDevice) (int64, error) {
+	rows, err := utils.GetMysqlClient().Id(item.Id).Update(item)
 	if err != nil {
 		glog.Errorf("Update the item %+v from %s failed,err:%+v", item, t.TableName(), err)
-		return err
+		return 0, err
 	}
-	return nil
+	return rows, nil
 }

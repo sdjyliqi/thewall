@@ -1,8 +1,13 @@
 package models
 
 import (
+	"email-center/utils"
+	"errors"
+	"github.com/golang/glog"
 	"time"
 )
+
+var IotGatewayEx IotGateway
 
 type IotGateway struct {
 	Id            int       `json:"id" xorm:"not null pk INT(11)"`
@@ -23,4 +28,51 @@ type IotGateway struct {
 
 func (t IotGateway) TableName() string {
 	return "iot_gateway"
+}
+
+//GetAllItems  ...获取全量数据
+func (t IotGateway) GetAllItems() ([]*IotGateway, error) {
+	var items []*IotGateway
+	err := utils.GetMysqlClient().Find(&items)
+	if err != nil {
+		glog.Errorf("The the items from %s failed,err:%+v", t.TableName(), err)
+		return nil, err
+	}
+	return items, nil
+}
+
+//GetItemsByPage  ...分页获取全量数据
+func (t IotGateway) GetItemsByPage(pageID int) ([]*IotGateway, error) {
+	if pageID < 0 {
+		return nil, errors.New("invalid-request")
+	}
+	var items []*IotGateway
+	pageCount := 100
+	err := utils.GetMysqlClient().Limit(pageCount, pageID*pageCount).Find(&items)
+	if err != nil {
+		glog.Errorf("The the items from %s failed,err:%+v", t.TableName(), err)
+		return nil, err
+	}
+	return items, nil
+}
+
+//GetItemByID ...根据ID获取对应某条记录
+func (t IotGateway) GetItemByID(id int64) (*IotGateway, error) {
+	var item *IotGateway
+	_, err := utils.GetMysqlClient().ID(id).Get(item)
+	if err != nil {
+		glog.Errorf("The the item by id %d from %s failed,err:%+v", id, t.TableName(), err)
+		return nil, err
+	}
+	return item, nil
+}
+
+//UpdateItemByID ... 根据数据ID，更新该条数据数据
+func (t IotGateway) UpdateItemByID(item *IotGateway) (int64, error) {
+	rows, err := utils.GetMysqlClient().Id(item.Id).Update(item)
+	if err != nil {
+		glog.Errorf("Update the item %+v from %s failed,err:%+v", item, t.TableName(), err)
+		return 0, err
+	}
+	return rows, nil
 }
