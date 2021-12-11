@@ -11,5 +11,5 @@ var (
 	ErrSendEmail  = ErrInfo{40003, errors.New("send email failed"), "发送邮件异常", "send the email failed"}
 
 	ErrDBGet    = ErrInfo{41000, errors.New("mysql abnormal"), "数据库查询异常", "database abnormal"}
-	ErrDBUpdate = ErrInfo{41001, errors.New("mysql abnormal"), "数据库查询异常", "database abnormal"}
+	ErrDBUpdate = ErrInfo{41002, errors.New("mysql abnormal"), "数据库更新异常", "database abnormal"}
 )

@@ -12,10 +12,8 @@ import (
 //UCLogin ... 用户登录
 func UCLogin(c *gin.Context) {
 	user := models.IotUc{}
-	c.BindJSON(&user)
-	//strEmail, _ := c.GetPostForm("email")
-	//strPassword, _ := c.GetPostForm("pp")
-	if user.Email == "" || user.Password == "" {
+	bindErr := c.BindJSON(&user)
+	if bindErr != nil || (user.Email == "" || user.Password == "") {
 		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
