@@ -41,7 +41,7 @@ func (t *IotUc) Login(email, password string) (bool, errs.ErrInfo) {
 //UpdateToken  ...更新token
 func (t *IotUc) UpdateToken(email, token string) errs.ErrInfo {
 	item := IotUc{Email: email, Token: token, LastLogin: time.Now()}
-	_, err := utils.GetMysqlClient().Where("email='%s'", email).Update(&item)
+	_, err := utils.GetMysqlClient().Where(fmt.Sprintf("email='%s'", email)).Update(&item)
 	if err != nil {
 		glog.Errorf("Update item  %+v from table %s failed,err:%+v", item, t.TableName(), err)
 		return errs.ErrDBUpdate
