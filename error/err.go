@@ -10,16 +10,24 @@ type ErrInfo struct {
 	MessageEN string
 }
 
-func (t ErrInfo) MsgEN() string {
-	return t.MessageEN
+//GetCode ...  获取错误码
+func (e ErrInfo) GetCode() int {
+	return e.Code
 }
 
-func (t ErrInfo) MsgCN() string {
-	return t.MessageCN
+// MsgEN... 获取错误的英文提示
+func (e ErrInfo) MsgEN() string {
+	return e.MessageEN
+}
+
+//MsgCN... 获取错误的中文提示
+func (e ErrInfo) MsgCN() string {
+	return e.MessageCN
 }
 
 var (
-	ErrUserName  = ErrInfo{40001, errors.New("invalid username"), "用户名不存在，请重试", "user not existed"}
-	ErrConnMysql = ErrInfo{50001, errors.New("connect mysql failed"), "数据库服务器开小差，请稍后重试", "connect mysql failed"}
-	ErrSendEmail = ErrInfo{50002, errors.New("send email failed"), "发送邮件异常，请稍后重试", "send the email failed"}
+	ErrBadRequest = ErrInfo{40000, errors.New("request invalid "), "请求参数非法", "invalid field value in request"}
+	ErrUCNoUser   = ErrInfo{40001, errors.New("user not existed"), "用户名不存在", "user not existed"}
+	ErrUCPassword = ErrInfo{40002, errors.New("password invalid"), "密码错误", "password invalid"}
+	ErrSendEmail  = ErrInfo{40003, errors.New("send email failed"), "发送邮件异常", "send the email failed"}
 )
