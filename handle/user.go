@@ -11,20 +11,22 @@ import (
 
 //UCLogin ... 用户登录
 func UCLogin(c *gin.Context) {
-	strEmail, _ := c.GetPostForm("email")
-	strPassword, _ := c.GetPostForm("pp")
-	if strEmail == "" || strPassword == "" {
+	user := models.IotUc{}
+	c.BindJSON(&user)
+	//strEmail, _ := c.GetPostForm("email")
+	//strPassword, _ := c.GetPostForm("pp")
+	if user.Email == "" || user.Password == "" {
 		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
-	_, err := models.UCModel.Login(strEmail, strPassword)
+	_, err := models.UCModel.Login(user.Email, user.Password)
 	if err != errs.Succ {
 		c.JSON(http.StatusOK, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
 		return
 	}
 	//通过校验后，需要重新生成token，更新到db中，后续需要写到redis中，为了调试方便，临时token 先不变化
-	token := utils.EncodingPassword(strEmail)
-	err = models.UCModel.UpdateToken(strEmail, token)
+	token := utils.EncodingPassword(user.Email)
+	err = models.UCModel.UpdateToken(user.Email, token)
 	if err != errs.Succ {
 		c.JSON(http.StatusOK, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
 		return
