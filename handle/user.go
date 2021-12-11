@@ -11,8 +11,8 @@ import (
 
 //UCLogin ... 用户登录
 func UCLogin(c *gin.Context) {
-	strEmail, _ := c.GetQuery("email")
-	strPassword, _ := c.GetQuery("pp")
+	strEmail, _ := c.GetPostForm("email")
+	strPassword, _ := c.GetPostForm("pp")
 	if strEmail == "" || strPassword == "" {
 		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
@@ -36,7 +36,16 @@ func UCLogin(c *gin.Context) {
 //UCRegister ... 用户注册
 func UCRegister(c *gin.Context) {
 	strEmail, _ := c.GetPostForm("email")
-	strPassport, _ := c.GetQuery("passport")
+	strPassport, _ := c.GetQuery("pp")
 	fmt.Println(strEmail, strPassport)
+	return
+}
+
+//UCResetPassword ... 重置密码
+func UCResetPassword(c *gin.Context) {
+	strEmail, _ := c.GetPostForm("email")
+	strPassport, _ := c.GetQuery("pp")
+	code, _ := c.GetQuery("code")
+	fmt.Println(strEmail, strPassport, code)
 	return
 }
