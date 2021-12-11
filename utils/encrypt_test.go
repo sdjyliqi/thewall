@@ -14,3 +14,10 @@ func Test_Base64(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, src, decodeValue)
 }
+
+func Test_EncodingPassword(t *testing.T) {
+	src, encodeValue := "abcd1234", "7e0f46f6e78bca29231abed718b895cc"
+	result := EncodingPassword(src)
+	t.Log(src, encodeValue, result)
+	assert.Equal(t, encodeValue, result)
+}

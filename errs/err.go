@@ -13,6 +13,11 @@ func (e ErrInfo) GetCode() int {
 	return e.Code
 }
 
+//GetError ...  获取异常
+func (e ErrInfo) GetError() error {
+	return e.Err
+}
+
 // MsgEN... 获取错误的英文提示
 func (e ErrInfo) MsgEN() string {
 	return e.MessageEN
