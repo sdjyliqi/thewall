@@ -15,10 +15,9 @@ func Test_IotUcLogin(t *testing.T) {
 
 func Test_IotUcRegister(t *testing.T) {
 	email := "yanghao@163.com"
-	token := utils.EncodingPassword(email)
 	nickname := "测试用户"
 	pwd := utils.EncodingPassword("123456")
-	user := IotUc{Email: email, Token: token, Password: pwd, Nickname: nickname}
+	user := IotUc{Email: email, Password: pwd, Nickname: nickname}
 	ok, err := UCModel.Register(user)
 	assert.Nil(t, err)
 	t.Log(ok)

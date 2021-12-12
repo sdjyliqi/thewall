@@ -41,7 +41,6 @@ func UCRegister(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
-	user.Token = utils.EncodingPassword(user.Email)
 	user.Password = utils.EncodingPassword(user.Password)
 	ok, err := models.UCModel.Register(user)
 	if err != errs.Succ {
