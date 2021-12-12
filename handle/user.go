@@ -33,11 +33,22 @@ func UCLogin(c *gin.Context) {
 	return
 }
 
-//UCRegister ... 用户注册
+//UCRegister ... 用户注册 //todo 缺少验证码校验
 func UCRegister(c *gin.Context) {
-	strEmail, _ := c.GetPostForm("email")
-	strPassport, _ := c.GetQuery("pp")
-	fmt.Println(strEmail, strPassport)
+	user := models.IotUc{}
+	bindErr := c.BindJSON(&user)
+	if bindErr != nil || (user.Email == "" || user.Password == "" || user.Nickname == "") {
+		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	user.Token = utils.EncodingPassword(user.Email)
+	user.Password = utils.EncodingPassword(user.Password)
+	ok, err := models.UCModel.Register(user)
+	if err != errs.Succ {
+		c.JSON(http.StatusOK, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": ok})
 	return
 }
 

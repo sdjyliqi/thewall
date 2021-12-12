@@ -14,6 +14,7 @@ var UCModel IotUc
 type IotUc struct {
 	Id        int       `json:"id" xorm:"not null pk autoincr INT(10)"`
 	Email     string    `json:"email" xorm:"default '' unique VARCHAR(64)"`
+	Nickname  string    `json:"nickname" xorm:"default '' unique VARCHAR(100)"`
 	Token     string    `json:"token" xorm:"VARCHAR(255)"`
 	Password  string    `json:"password" xorm:"VARCHAR(128)"`
 	LastLogin time.Time `json:"last_login" xorm:"DATETIME"`
@@ -50,6 +51,20 @@ func (t *IotUc) UpdateToken(email, token string) errs.ErrInfo {
 }
 
 //Register  ...用户注册
-func (t *IotUc) Register() error {
-	return nil
+func (t *IotUc) Register(user IotUc) (bool, errs.ErrInfo) {
+	var item IotUc
+	ok, err := utils.GetMysqlClient().Where(fmt.Sprintf("email='%s'", user.Email)).Or(fmt.Sprintf("nickname='%s'", user.Nickname)).Get(&item)
+	if err != nil {
+		glog.Errorf("Get item by email %s or nickname %s from table %s failed,err:%+v", user.Email, user.Nickname, t.TableName(), err)
+		return false, errs.ErrDBGet
+	}
+	if ok {
+		return false, errs.ErrUCUserExisted
+	}
+	count, insertErr := utils.GetMysqlClient().InsertOne(user)
+	if insertErr != nil {
+		glog.Errorf("Insert user %+v from table %s failed,err:%+v", user, t.TableName(), insertErr)
+		return false, errs.ErrDBInsert
+	}
+	return count > 0, errs.Succ
 }
