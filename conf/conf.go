@@ -13,8 +13,10 @@ var ConfigFile string
 
 // Config ...
 type Config struct {
-	DBMysql string `yaml:"db_mysql"`
-	RunPort int    `yaml:"run_port"`
+	DBMysql       string `yaml:"db_mysql"`
+	RedisAddr     string `yaml:"redis_addr"`
+	RedisPassword string `yaml:"redis_password"`
+	RunPort       int    `yaml:"run_port"`
 }
 
 // YAMLLoad 加载文件并解析，包含加密项的自动解密
@@ -42,6 +44,8 @@ func InitConfig(f string, v *Config) {
 
 //DefaultConfig .
 var DefaultConfig = Config{
-	DBMysql: "thewall:0Thewall!2022@tcp(114.55.139.105:3306)/thewall?charset=utf8mb4",
-	RunPort: 15001,
+	DBMysql:       "thewall:0Thewall!2022@tcp(114.55.139.105:3306)/thewall?charset=utf8mb4",
+	RedisAddr:     "localhost:6379",
+	RedisPassword: "Aa123.",
+	RunPort:       15001,
 }

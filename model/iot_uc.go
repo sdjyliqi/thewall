@@ -68,3 +68,24 @@ func (t *IotUc) Register(user IotUc) (bool, errs.ErrInfo) {
 	}
 	return count > 0, errs.Succ
 }
+
+//ResetPassword  ...重置密码
+func (t *IotUc) ResetPassword(user IotUc) (bool, errs.ErrInfo) {
+	var item IotUc
+	ok, err := utils.GetMysqlClient().Where(fmt.Sprintf("email='%s'", user.Email)).Or(fmt.Sprintf("nickname='%s'", user.Nickname)).Get(&item)
+	if err != nil {
+		glog.Errorf("Get item by email %s from table %s failed,err:%+v", user.Email, t.TableName(), err)
+		return false, errs.ErrDBGet
+	}
+	if !ok {
+		return false, errs.ErrUCNoUser
+	}
+	//设置新密码
+	item.Password = user.Password
+	count, updateErr := utils.GetMysqlClient().Update(item)
+	if updateErr != nil {
+		glog.Errorf("Update item  %+v from table %s failed,err:%+v", item, t.TableName(), updateErr)
+		return false, errs.ErrDBUpdate
+	}
+	return count > 0, errs.Succ
+}

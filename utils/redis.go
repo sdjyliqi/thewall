@@ -1,0 +1,34 @@
+package utils
+
+import (
+	"context"
+	"fmt"
+	"github.com/go-redis/redis/v8"
+	"github.com/golang/glog"
+)
+
+var (
+	redisClient *redis.Client
+)
+
+//InitRedis ...初始化redis，记得要先解密
+func InitRedis(addr string, password string) (*redis.Client, error) {
+	redisClient = redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Password: password,
+		DB:       0, // use default DB
+	})
+
+	_, err := redisClient.Ping(context.Background()).Result()
+	if err != nil {
+		glog.Fatalf("[init] Initialize redis client failed,please check the addr:%+v,err:%+v", addr, err)
+	}
+
+	fmt.Println("Init redis:", addr, redisClient)
+	return redisClient, err
+}
+
+//GetRedisClient ...创建到redis的连接
+func GetRedisClient() *redis.Client {
+	return redisClient
+}
