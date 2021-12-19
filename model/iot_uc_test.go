@@ -1,10 +1,10 @@
-package models
+package model
 
 import (
-	"email-center/utils"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"thewall/utils"
 )
 
 func Test_IotUcLogin(t *testing.T) {

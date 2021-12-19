@@ -1,12 +1,12 @@
 package main
 
 import (
-	"email-center/conf"
-	"email-center/router"
 	"flag"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
+	"thewall/conf"
+	"thewall/router"
 )
 
 func init() {

@@ -1,6 +1,6 @@
 package utils
 
-import "email-center/conf"
+import "thewall/conf"
 
 //init() ...完成工具类相关的初始化相关事项
 func init() {

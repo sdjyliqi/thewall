@@ -1,11 +1,11 @@
-package models
+package model
 
 import (
-	"email-center/errs"
-	"email-center/utils"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/glog"
+	"thewall/errs"
+	"thewall/utils"
 	"time"
 )
 

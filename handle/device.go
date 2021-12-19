@@ -1,15 +1,15 @@
 package handle
 
 import (
-	"email-center/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"thewall/model"
 )
 
 //GetDeviceAllItems ... 获取device全量数据
 func GetDeviceAllItems(c *gin.Context) {
-	items, err := models.IotDeviceEx.GetAllItems()
+	items, err := model.IotDeviceEx.GetAllItems()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "msg": err.Error(), "data": nil})
 		return
@@ -30,7 +30,7 @@ func GetDeviceItemsByPage(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
 		return
 	}
-	items, err := models.IotDeviceEx.GetItemsByPage(pageId)
+	items, err := model.IotDeviceEx.GetItemsByPage(pageId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "msg": err.Error(), "data": nil})
 		return

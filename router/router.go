@@ -1,8 +1,8 @@
 package router
 
 import (
-	"email-center/handle"
 	"github.com/gin-gonic/gin"
+	"thewall/handle"
 )
 
 func InitRouter(r *gin.Engine) {

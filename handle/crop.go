@@ -1,10 +1,10 @@
 package handle
 
 import (
-	"email-center/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"thewall/model"
 )
 
 //HelloWord ... 测试
@@ -18,7 +18,7 @@ func GetCropAllItems(c *gin.Context) {
 	//if keywords == "" {
 	//	c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
 	//}
-	items, err := models.IotCropEx.GetAllItems()
+	items, err := model.IotCropEx.GetAllItems()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "msg": err.Error(), "data": nil})
 		return
@@ -39,7 +39,7 @@ func GetCropItemsByPage(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
 		return
 	}
-	items, err := models.IotCropEx.GetItemsByPage(pageId)
+	items, err := model.IotCropEx.GetItemsByPage(pageId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "msg": err.Error(), "data": nil})
 		return

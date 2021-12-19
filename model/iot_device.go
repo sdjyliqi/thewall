@@ -1,9 +1,9 @@
-package models
+package model
 
 import (
-	"email-center/utils"
 	"errors"
 	"github.com/golang/glog"
+	"thewall/utils"
 	"time"
 )
 

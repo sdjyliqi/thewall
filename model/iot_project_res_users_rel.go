@@ -1,4 +1,4 @@
-package models
+package model
 
 type IotProjectResUsersRel struct {
 	IotProjectId int `json:"iot_project_id" xorm:"not null index INT(11)"`

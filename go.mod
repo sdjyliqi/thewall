@@ -1,4 +1,4 @@
-module email-center
+module thewall
 
 go 1.16
 
