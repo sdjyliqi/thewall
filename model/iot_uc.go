@@ -13,10 +13,11 @@ var UCModel IotUc
 
 type IotUc struct {
 	Id        int       `json:"id" xorm:"not null pk autoincr INT(10)"`
-	Email     string    `json:"email" xorm:"default '' unique VARCHAR(64)"`
-	Nickname  string    `json:"nickname" xorm:"default '' unique VARCHAR(100)"`
+	Email     string    `json:"email" xorm:"not null pk default '' unique VARCHAR(64)"`
+	Country   string    `json:"country" xorm:"default '' comment('用户所在国家') VARCHAR(32)"`
+	Nickname  string    `json:"nickname" xorm:"VARCHAR(32)"`
 	Token     string    `json:"token" xorm:"VARCHAR(255)"`
-	Password  string    `json:"password" xorm:"VARCHAR(128)"`
+	Password  string    `json:"password" xorm:"VARCHAR(32)"`
 	LastLogin time.Time `json:"last_login" xorm:"DATETIME"`
 	Desc      string    `json:"desc" xorm:"default '' comment('描述信息') VARCHAR(1024)"`
 }
@@ -42,7 +43,8 @@ func (t *IotUc) Login(email, password string) (bool, errs.ErrInfo) {
 //UpdateToken  ...更新token
 func (t *IotUc) UpdateToken(email, token string) errs.ErrInfo {
 	item := IotUc{Email: email, Token: token, LastLogin: time.Now()}
-	_, err := utils.GetMysqlClient().Where(fmt.Sprintf("email='%s'", email)).Update(&item)
+	cols := []string{"token", "last_login"}
+	_, err := utils.GetMysqlClient().Cols(cols...).Where(fmt.Sprintf("email='%s'", email)).Update(&item)
 	if err != nil {
 		glog.Errorf("Update item  %+v from table %s failed,err:%+v", item, t.TableName(), err)
 		return errs.ErrDBUpdate
@@ -72,7 +74,7 @@ func (t *IotUc) Register(user IotUc) (bool, errs.ErrInfo) {
 //ResetPassword  ...重置密码
 func (t *IotUc) ResetPassword(user IotUc) (bool, errs.ErrInfo) {
 	var item IotUc
-	ok, err := utils.GetMysqlClient().Where(fmt.Sprintf("email='%s'", user.Email)).Or(fmt.Sprintf("nickname='%s'", user.Nickname)).Get(&item)
+	ok, err := utils.GetMysqlClient().Where(fmt.Sprintf("email='%s'", user.Email)).Get(&item)
 	if err != nil {
 		glog.Errorf("Get item by email %s from table %s failed,err:%+v", user.Email, t.TableName(), err)
 		return false, errs.ErrDBGet
@@ -82,7 +84,9 @@ func (t *IotUc) ResetPassword(user IotUc) (bool, errs.ErrInfo) {
 	}
 	//设置新密码
 	item.Password = user.Password
-	count, updateErr := utils.GetMysqlClient().Update(item)
+	//设置一下影响的列
+	cols := []string{"password"}
+	count, updateErr := utils.GetMysqlClient().Cols(cols...).ID(item.Id).Update(item)
 	if updateErr != nil {
 		glog.Errorf("Update item  %+v from table %s failed,err:%+v", item, t.TableName(), updateErr)
 		return false, errs.ErrDBUpdate
