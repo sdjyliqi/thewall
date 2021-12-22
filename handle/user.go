@@ -17,7 +17,7 @@ type UserDto struct {
 	Email    string `json:"email"`    //邮件
 	Nickname string `json:"nickname"` //昵称
 	Password string `json:"password"` //密码
-	Country  string `json:"password"` //国家
+	Country  string `json:"country"`  //国家
 	Code     string `json:"code"`     //验证码
 }
 
@@ -49,7 +49,7 @@ func UCLogin(c *gin.Context) {
 func UCRegister(c *gin.Context) {
 	userDto := UserDto{}
 	bindErr := c.BindJSON(&userDto)
-	if bindErr != nil || (userDto.Email == "" || userDto.Password == "" || userDto.Nickname == "" || userDto.Code == "") {
+	if bindErr != nil || (userDto.Email == "" || userDto.Password == "" || userDto.Nickname == "" || userDto.Code == "" || userDto.Country == "") {
 		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
@@ -134,7 +134,14 @@ func UCGetCode(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": code})
+	sendErr := utils.SendToMail("sdjyliqi@163.com", email, "[TheWell]Verification Code", []byte("Verification Code:"+code))
+	if sendErr != nil {
+		glog.Fatalf("Send to email:%+v,err:%+v", email, sendErr)
+		c.JSON(http.StatusOK, gin.H{"code": errs.ErrSendEmail.Code, "msg": errs.ErrSendEmail.MessageEN, "data": nil})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": nil})
 	return
 }
 

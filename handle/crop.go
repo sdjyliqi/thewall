@@ -12,13 +12,13 @@ func HelloWord(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": gin.H{"name": "liqi ", "amount": 0}})
 }
 
-//GetCropAllItems ... 获取crop全量数据
-func GetCropAllItems(c *gin.Context) {
+//GetCropTypeAllItems ... 获取crop_type全量数据
+func GetCropTypeAllItems(c *gin.Context) {
 	//keywords, _ := c.GetQuery("idx")
 	//if keywords == "" {
 	//	c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
 	//}
-	items, err := model.IotCropEx.GetAllItems()
+	items, err := model.IotCropTypeEx.GetAllItems()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "msg": err.Error(), "data": nil})
 		return
@@ -27,8 +27,8 @@ func GetCropAllItems(c *gin.Context) {
 	return
 }
 
-//GetCropItemsByPage ... 获取crop全量数据
-func GetCropItemsByPage(c *gin.Context) {
+//GetCropTypeItemsByPage ... 分页获取crop_type数据
+func GetCropTypeItemsByPage(c *gin.Context) {
 	strPage, _ := c.GetQuery("page")
 	if strPage == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
@@ -39,7 +39,7 @@ func GetCropItemsByPage(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
 		return
 	}
-	items, err := model.IotCropEx.GetItemsByPage(pageId)
+	items, err := model.IotCropTypeEx.GetItemsByPage(pageId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "msg": err.Error(), "data": nil})
 		return
