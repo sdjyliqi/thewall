@@ -18,7 +18,7 @@ func GetCropTypeAllItems(c *gin.Context) {
 	//if keywords == "" {
 	//	c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
 	//}
-	items, err := model.IotCropTypeEx.GetAllItems()
+	items, err := model.CropTypeModel.GetAllItems()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "msg": err.Error(), "data": nil})
 		return
@@ -39,7 +39,7 @@ func GetCropTypeItemsByPage(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
 		return
 	}
-	items, err := model.IotCropTypeEx.GetItemsByPage(pageId)
+	items, err := model.CropTypeModel.GetItemsByPage(pageId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "msg": err.Error(), "data": nil})
 		return

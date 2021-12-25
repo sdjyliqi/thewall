@@ -12,6 +12,7 @@ var (
 	ErrUCUserExisted  = ErrInfo{40004, errors.New("user existed"), "用户名已存在", "user existed"}
 	ErrCodeNotExisted = ErrInfo{40005, errors.New("code not existed"), "验证码不存在", "code not existed"}
 	ErrCode           = ErrInfo{40006, errors.New("code invalid"), "验证码错误", "code invalid"}
+	ErrAdd            = ErrInfo{40007, errors.New("add failed"), "添加失败", "add failed"}
 
 	ErrDBGet    = ErrInfo{41000, errors.New("mysql select abnormal"), "数据库查询异常", "database select abnormal"}
 	ErrDBInsert = ErrInfo{41001, errors.New("mysql insert abnormal"), "数据库插入异常", "database insert abnormal"}

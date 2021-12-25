@@ -63,12 +63,12 @@ func (t *IotUc) Register(user IotUc) (bool, errs.ErrInfo) {
 	if ok {
 		return false, errs.ErrUCUserExisted
 	}
-	count, insertErr := utils.GetMysqlClient().InsertOne(user)
+	rows, insertErr := utils.GetMysqlClient().InsertOne(user)
 	if insertErr != nil {
 		glog.Errorf("Insert user %+v from table %s failed,err:%+v", user, t.TableName(), insertErr)
 		return false, errs.ErrDBInsert
 	}
-	return count > 0, errs.Succ
+	return rows > 0, errs.Succ
 }
 
 //ResetPassword  ...重置密码

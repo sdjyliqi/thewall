@@ -1,6 +1,9 @@
 package model
 
 import (
+	"github.com/golang/glog"
+	"thewall/errs"
+	"thewall/utils"
 	"time"
 )
 
@@ -19,4 +22,36 @@ type IotSoilType struct {
 
 func (t IotSoilType) TableName() string {
 	return "iot_soil_type"
+}
+
+//GetAllItems  ...获取全量数据
+func (t IotSoilType) GetAllItems() ([]*IotSoilType, error) {
+	var items []*IotSoilType
+	err := utils.GetMysqlClient().Find(&items)
+	if err != nil {
+		glog.Errorf("The the items from %s failed,err:%+v", t.TableName(), err)
+		return nil, err
+	}
+	return items, nil
+}
+
+//UpdateItemByID ... 根据数据ID，更新该条数据数据
+func (t IotSoilType) UpdateItemByID(item *IotSoilType) error {
+	cols := []string{"name", "code", "field_capacity", "total_available_water", "pwp", "write_uid", "write_date"}
+	_, err := utils.GetMysqlClient().ID(item.Id).Cols(cols...).Update(item)
+	if err != nil {
+		glog.Errorf("Update the item %+v from %s failed,err:%+v", item, t.TableName(), err)
+		return err
+	}
+	return nil
+}
+
+//AddItem ... 添加一条数据
+func (t IotSoilType) AddItem(item *IotSoilType) (bool, errs.ErrInfo) {
+	rows, err := utils.GetMysqlClient().InsertOne(item)
+	if err != nil {
+		glog.Errorf("Insert item %+v from table %s failed,err:%+v", item, t.TableName(), err)
+		return false, errs.ErrDBInsert
+	}
+	return rows > 0, errs.Succ
 }

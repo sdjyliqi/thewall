@@ -1,6 +1,10 @@
 package model
 
 import (
+	"errors"
+	"github.com/golang/glog"
+	"thewall/errs"
+	"thewall/utils"
 	"time"
 )
 
@@ -26,4 +30,29 @@ type IotValue struct {
 
 func (t IotValue) TableName() string {
 	return "iot_value"
+}
+
+//GetItemsByPage  ...分页获取全量数据
+func (t IotValue) GetItemsByPage(pageID int) ([]*IotValue, error) {
+	if pageID < 0 {
+		return nil, errors.New("invalid-request")
+	}
+	var items []*IotValue
+	pageCount := 100
+	err := utils.GetMysqlClient().Limit(pageCount, pageID*pageCount).Find(&items)
+	if err != nil {
+		glog.Errorf("The the items from %s failed,err:%+v", t.TableName(), err)
+		return nil, err
+	}
+	return items, nil
+}
+
+//AddItem ... 添加一条数据
+func (t IotValue) AddItem(item *IotValue) (bool, errs.ErrInfo) {
+	rows, err := utils.GetMysqlClient().InsertOne(item)
+	if err != nil {
+		glog.Errorf("Insert item %+v from table %s failed,err:%+v", item, t.TableName(), err)
+		return false, errs.ErrDBInsert
+	}
+	return rows > 0, errs.Succ
 }

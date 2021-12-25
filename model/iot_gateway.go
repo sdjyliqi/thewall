@@ -3,11 +3,12 @@ package model
 import (
 	"errors"
 	"github.com/golang/glog"
+	"thewall/errs"
 	"thewall/utils"
 	"time"
 )
 
-var IotGatewayEx IotGateway
+var GatewayModel IotGateway
 
 type IotGateway struct {
 	Id            int       `json:"id" xorm:"not null pk INT(11)"`
@@ -75,4 +76,14 @@ func (t IotGateway) UpdateItemByID(item *IotGateway) (int64, error) {
 		return 0, err
 	}
 	return rows, nil
+}
+
+//AddItem ... 添加一条数据
+func (t IotGateway) AddItem(item *IotGateway) (bool, errs.ErrInfo) {
+	rows, err := utils.GetMysqlClient().InsertOne(item)
+	if err != nil {
+		glog.Errorf("Insert item %+v from table %s failed,err:%+v", item, t.TableName(), err)
+		return false, errs.ErrDBInsert
+	}
+	return rows > 0, errs.Succ
 }
