@@ -31,8 +31,8 @@ type IotField struct {
 
 //FieldExtend ...先临时做一个多表查询
 type FieldExtend struct {
-	IotField    `xorm:"extends"`
-	IotCropType `xorm:"extends"`
+	IotField `xorm:"extends"`
+	//IotCropType `xorm:"extends"`
 	IotSoilType `xorm:"extends"`
 }
 
@@ -41,7 +41,7 @@ func (t IotField) TableName() string {
 }
 
 //AddFieldByUser ... 用户增加土地
-func (t IotField) AddFieldByUser(item *IotField, userID int) errs.ErrInfo {
+func (t IotField) AddFieldByUser(item *IotField) errs.ErrInfo {
 	//Todo，后续需要去重，条件需要沟通
 	item.CreateDate = time.Now()
 	item.WriteDate = time.Now()
@@ -59,7 +59,7 @@ func (t IotField) EditField(item *IotField) errs.ErrInfo {
 	cols := []string{"name", "name_cn", "longitude", "latitude", "area", "soil_type_id", "write_date"}
 	item.CreateDate = time.Now()
 	item.WriteDate = time.Now()
-	_, err := utils.GetMysqlClient().Id(item).Cols(cols...).Update(item)
+	_, err := utils.GetMysqlClient().ID(item.Id).Cols(cols...).Update(item)
 	if err != nil {
 		glog.Errorf("Insert the item %+v to table %s failed,err:%+v", *item, t.TableName(), err)
 		return errs.ErrDBInsert
@@ -80,9 +80,9 @@ func (t IotField) DelField(fieldID, userID int) errs.ErrInfo {
 
 func (t IotField) GetItemsByUser(userID int) ([]*FieldExtend, errs.ErrInfo) {
 	var items []*FieldExtend
-	join := fmt.Sprintf("%s.soil_type_id=%s.id", t.TableName(), IotCropEx.TableName())
+	join := fmt.Sprintf("%s.soil_type_id=%s.id", t.TableName(), IotSoilTypeModel.TableName())
 	condition := fmt.Sprintf("%s.user_id=%d", t.TableName(), userID)
-	err := utils.GetMysqlClient().Table(t.TableName()).Join("LEFT", IotCropEx, join).Where(condition).Find(&items)
+	err := utils.GetMysqlClient().Table(t.TableName()).Join("LEFT", IotSoilTypeModel, join).Where(condition).Find(&items)
 	if err != nil {
 		glog.Errorf("The the items from %s failed,err:%+v", t.TableName(), err)
 		return nil, errs.ErrDBGet

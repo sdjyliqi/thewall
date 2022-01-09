@@ -10,7 +10,7 @@ import (
 )
 
 type AddField struct {
-	Id         int     `json:"id"`
+	Id         int     `json:"id"` //新增的时候，该字段为空
 	Name       string  `json:"name" `
 	NameCn     string  `json:"name_cn" `
 	SoilTypeId int     `json:"soil_type_id" ` //土地类型
@@ -21,7 +21,7 @@ type AddField struct {
 	UserID     int     `json:"user_id"`       //增加地
 }
 
-//UCLogin ... 用户登录
+//FieldAdd ... 增加农场
 func FieldAdd(c *gin.Context) {
 	item := AddField{}
 	err := c.BindJSON(&item)
@@ -53,7 +53,7 @@ func FieldAdd(c *gin.Context) {
 		CreateDate:    time.Now(),
 		WriteDate:     time.Now(),
 	}
-	addErr := model.IotFieldEx.AddFieldByUser(addItem, item.UserID)
+	addErr := model.IotFieldEx.AddFieldByUser(addItem)
 	if addErr != errs.Succ {
 		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
 		return
@@ -62,7 +62,7 @@ func FieldAdd(c *gin.Context) {
 	return
 }
 
-//FieldEdit ... 用户登录
+//FieldEdit ...修改农场信息
 func FieldEdit(c *gin.Context) {
 	item := AddField{}
 	err := c.BindJSON(&item)

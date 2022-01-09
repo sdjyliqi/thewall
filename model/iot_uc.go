@@ -45,7 +45,7 @@ func (t *IotUc) ChkUserExisted(id int) (bool, errs.ErrInfo) {
 	var item IotUc
 	ok, err := utils.GetMysqlClient().Id(id).Get(&item)
 	if err != nil {
-		glog.Errorf("Get item by id %s from table %s failed,err:%+v", id, t.TableName(), err)
+		glog.Errorf("Get item by id %d from table %s failed,err:%+v", id, t.TableName(), err)
 		return false, errs.ErrDBGet
 	}
 	if !ok {
