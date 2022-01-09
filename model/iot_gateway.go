@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"github.com/golang/glog"
 	"thewall/errs"
 	"thewall/utils"
@@ -81,4 +82,15 @@ func (t IotGateway) AddItem(item *IotGateway) (bool, errs.ErrInfo) {
 		return false, errs.ErrDBInsert
 	}
 	return rows > 0, errs.Succ
+}
+
+func (t IotGateway) GetItemsByUser(userID int) ([]*IotGateway, error) {
+	var items []*IotGateway
+	condition := fmt.Sprintf("%s.user_id=%d", t.TableName(), userID)
+	err := utils.GetMysqlClient().Where(condition).Find(&items)
+	if err != nil {
+		glog.Errorf("The the items from %s failed,err:%+v", t.TableName(), err)
+		return nil, err
+	}
+	return items, nil
 }

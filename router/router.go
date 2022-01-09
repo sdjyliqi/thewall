@@ -17,4 +17,8 @@ func InitRouter(r *gin.Engine) {
 
 	r.GET("/device/items", handle.GetDeviceAllItems)
 	r.GET("/device/page", handle.GetDeviceItemsByPage)
+
+	r.POST("/field/add", handle.FieldAdd)       //某用户增加地
+	r.GET("/field/items", handle.FieldGetItems) //查询某个用户的所属土地
+
 }
