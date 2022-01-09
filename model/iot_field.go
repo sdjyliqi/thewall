@@ -31,9 +31,10 @@ type IotField struct {
 
 //FieldExtend ...先临时做一个多表查询
 type FieldExtend struct {
-	IotField `xorm:"extends"`
-	//IotCropType `xorm:"extends"`
+	IotField    `xorm:"extends"`
+	IotCropType `xorm:"extends"`
 	IotSoilType `xorm:"extends"`
+	IotSensor   `xorm:"extends"`
 }
 
 func (t IotField) TableName() string {
@@ -80,9 +81,10 @@ func (t IotField) DelField(fieldID, userID int) errs.ErrInfo {
 
 func (t IotField) GetItemsByUser(userID int) ([]*FieldExtend, errs.ErrInfo) {
 	var items []*FieldExtend
-	join := fmt.Sprintf("%s.soil_type_id=%s.id", t.TableName(), IotSoilTypeModel.TableName())
+	joinSoilType := fmt.Sprintf("%s.soil_type_id=%s.id", t.TableName(), IotSoilTypeModel.TableName())
+	//joinSensor := fmt.Sprintf("%s.id=%s.id", t.TableName(), SensorModel.TableName())
 	condition := fmt.Sprintf("%s.user_id=%d", t.TableName(), userID)
-	err := utils.GetMysqlClient().Table(t.TableName()).Join("LEFT", IotSoilTypeModel, join).Where(condition).Find(&items)
+	err := utils.GetMysqlClient().Table(t.TableName()).Join("LEFT", IotSoilTypeModel, joinSoilType).Where(condition).Find(&items)
 	if err != nil {
 		glog.Errorf("The the items from %s failed,err:%+v", t.TableName(), err)
 		return nil, errs.ErrDBGet

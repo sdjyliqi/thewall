@@ -19,6 +19,7 @@ type AddField struct {
 	Latitude   float32 `json:"latitude" `     //维度
 	Area       float32 `json:"area" `         //面积
 	UserID     int     `json:"user_id"`       //增加地
+	Sensors    []int   `json:"sensors"`       //增加地
 }
 
 //FieldAdd ... 增加农场
