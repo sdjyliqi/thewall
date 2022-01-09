@@ -13,6 +13,8 @@ var SensorModel IotSensor
 type IotSensor struct {
 	Id              int       `json:"id" xorm:"not null pk autoincr INT(11)"`
 	Name            string    `json:"name" xorm:"comment('Name') LONGTEXT"`
+	FieldId         int       `json:"field_id" xorm:"comment('农场id') INT(11)"`
+	UserId          int       `json:"user_id" xorm:"INT(11)"`
 	GatewayId       int       `json:"gateway_id" xorm:"comment('gateway_id') INT(11)"`
 	SensorTypeId    int       `json:"sensor_type_id" xorm:"comment('Sensor Type') INT(11)"`
 	Depth           int       `json:"depth" xorm:"comment('Depth') INT(11)"`
