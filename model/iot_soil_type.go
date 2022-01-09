@@ -8,15 +8,16 @@ import (
 )
 
 type IotSoilType struct {
-	Id                  int       `json:"id" xorm:"not null pk INT(11)"`
-	Name                string    `json:"name" xorm:"comment('Name') LONGTEXT"`
-	Code                string    `json:"code" xorm:"comment('Code') LONGTEXT"`
-	FieldCapacity       string    `json:"field_capacity" xorm:"comment('Field Capacity') DECIMAL(65,30)"`
-	TotalAvailableWater string    `json:"total_available_water" xorm:"comment('Total Available Water') DECIMAL(65,30)"`
-	Pwp                 string    `json:"pwp" xorm:"comment('PWP') DECIMAL(65,30)"`
-	CreateUid           int       `json:"create_uid" xorm:"comment('Created by') index INT(11)"`
+	Id                  int       `json:"id" xorm:"not null pk autoincr INT(11)"`
+	Name                string    `json:"name" xorm:"comment('Name') VARCHAR(32)"`
+	NameCn              string    `json:"name_cn" xorm:"comment('中文名') VARCHAR(32)"`
+	Code                string    `json:"code" xorm:"comment('Code') VARCHAR(32)"`
+	FieldCapacity       float32   `json:"field_capacity" xorm:"comment('Field Capacity') FLOAT(11,4)"`
+	TotalAvailableWater float32   `json:"total_available_water" xorm:"comment('Total Available Water') FLOAT(11,4)"`
+	Pwp                 float32   `json:"pwp" xorm:"comment('PWP') FLOAT(11,4)"`
+	CreateUid           int       `json:"create_uid" xorm:"comment('Created by') INT(11)"`
 	CreateDate          time.Time `json:"create_date" xorm:"comment('Created on') DATETIME"`
-	WriteUid            int       `json:"write_uid" xorm:"comment('Last Updated by') index INT(11)"`
+	WriteUid            int       `json:"write_uid" xorm:"comment('Last Updated by') INT(11)"`
 	WriteDate           time.Time `json:"write_date" xorm:"comment('Last Updated on') DATETIME"`
 }
 
