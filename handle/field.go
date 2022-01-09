@@ -10,6 +10,7 @@ import (
 )
 
 type AddField struct {
+	Id         int     `json:"id"`
 	Name       string  `json:"name" `
 	NameCn     string  `json:"name_cn" `
 	SoilTypeId int     `json:"soil_type_id" ` //土地类型
@@ -53,6 +54,44 @@ func FieldAdd(c *gin.Context) {
 		WriteDate:     time.Now(),
 	}
 	addErr := model.IotFieldEx.AddFieldByUser(addItem, item.UserID)
+	if addErr != errs.Succ {
+		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": nil})
+	return
+}
+
+//FieldEdit ... 用户登录
+func FieldEdit(c *gin.Context) {
+	item := AddField{}
+	err := c.BindJSON(&item)
+	if err != nil || (item.Id < 0 || item.UserID < 1 || item.Name == "" || item.Latitude < 0 || item.Longitude < 0 || item.SoilTypeId < 0) {
+		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	//首先判断userid 是否合法
+	existed, chkErr := model.UCModel.ChkUserExisted(item.UserID)
+	if chkErr != errs.Succ {
+		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
+		return
+	}
+	//如果某用户不存在，直接异常返回即可
+	if !existed {
+		c.JSON(http.StatusOK, gin.H{"code": errs.ErrUCNoUser.Code, "msg": errs.ErrUCNoUser.MessageEN, "data": nil})
+	}
+	addItem := &model.IotField{
+		Name:       item.Name,
+		NameCn:     item.NameCn,
+		UserId:     item.UserID,
+		Longitude:  item.Longitude,
+		Latitude:   item.Latitude,
+		Area:       item.Area,
+		SoilTypeId: item.SoilTypeId,
+		CreateUid:  item.UserID,
+		WriteDate:  time.Now(),
+	}
+	addErr := model.IotFieldEx.EditField(addItem)
 	if addErr != errs.Succ {
 		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
 		return

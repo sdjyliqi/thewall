@@ -19,7 +19,8 @@ func InitRouter(r *gin.Engine) {
 	r.GET("/device/page", handle.GetDeviceItemsByPage)
 
 	r.POST("/field/add", handle.FieldAdd)       //某用户增加地
-	r.POST("/field/del", handle.FieldDel)       //某用户删除土地
+	r.POST("/field/edit", handle.FieldEdit)     //修改田地信息
+	r.POST("/field/del", handle.FieldDel)       //某用户删除田地信息
 	r.GET("/field/items", handle.FieldGetItems) //查询某个用户的所属土地
 
 }
