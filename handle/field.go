@@ -61,6 +61,27 @@ func FieldAdd(c *gin.Context) {
 	return
 }
 
+//FieldDel ... 获取验证码
+func FieldDel(c *gin.Context) {
+	strUID, _ := c.GetQuery("user_id")
+	strFID, _ := c.GetQuery("field_id")
+	//判断一下userid是否为空
+	if strUID == "" || strFID == "" {
+		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	//获取用户id
+	uid := utils.Convert2Int(strUID)
+	fid := utils.Convert2Int(strFID)
+	errEx := model.IotFieldEx.DelField(fid, uid)
+	if errEx != errs.Succ {
+		c.JSON(http.StatusOK, gin.H{"code": errEx.Code, "msg": errEx.MessageEN, "data": nil})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": nil})
+	return
+}
+
 //FieldGetItems ... 获取验证码
 func FieldGetItems(c *gin.Context) {
 	userID, _ := c.GetQuery("user_id")

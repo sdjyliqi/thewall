@@ -17,4 +17,5 @@ var (
 	ErrDBGet    = ErrInfo{41000, errors.New("mysql select abnormal"), "数据库查询异常", "database select abnormal"}
 	ErrDBInsert = ErrInfo{41001, errors.New("mysql insert abnormal"), "数据库插入异常", "database insert abnormal"}
 	ErrDBUpdate = ErrInfo{41002, errors.New("mysql update abnormal"), "数据库更新异常", "database update abnormal"}
+	ErrDBDel    = ErrInfo{41003, errors.New("mysql delete abnormal"), "数据库删除异常", "database delete abnormal"}
 )
