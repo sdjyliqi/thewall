@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-var IotCropEx IotCropType
+var CropTypeModel IotCropType
 
 type IotCropType struct {
 	Id         int       `json:"id" xorm:"not null pk autoincr INT(11)"`

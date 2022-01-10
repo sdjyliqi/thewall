@@ -6,7 +6,7 @@ import (
 )
 
 func Test_IotCropTypeGetAllItems(t *testing.T) {
-	items, err := IotCropEx.GetAllItems()
+	items, err := CropTypeModel.GetAllItems()
 	assert.Nil(t, err)
 	t.Log(items)
 }

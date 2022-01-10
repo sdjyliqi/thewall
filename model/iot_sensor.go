@@ -78,7 +78,7 @@ func (t IotSensor) GetItemsByField(fieldID int) ([]*IotSensor, errs.ErrInfo) {
 }
 
 //GetItemsByUser ...获取当前某农场绑定的传感器列表
-func (t IotSensor) GetItemsByUser(userID int64) ([]*IotSensor, errs.ErrInfo) {
+func (t IotSensor) GetItemsByUser(userID int) ([]*IotSensor, errs.ErrInfo) {
 	var items []*IotSensor
 	err := utils.GetMysqlClient().Where("user_id=?", userID).Find(&items)
 	if err != nil {
