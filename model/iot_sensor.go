@@ -66,6 +66,28 @@ func (t IotSensor) GetItemByID(id int64) (*IotSensor, error) {
 	return item, nil
 }
 
+//GetItemsByField ...获取当前某农场绑定的传感器列表
+func (t IotSensor) GetItemsByField(fieldID int) ([]*IotSensor, errs.ErrInfo) {
+	var items []*IotSensor
+	err := utils.GetMysqlClient().Where("field_id=?", fieldID).Find(&items)
+	if err != nil {
+		glog.Errorf("Get items by field %d from %s failed,err:%+v", fieldID, t.TableName(), err)
+		return nil, errs.ErrDBGet
+	}
+	return items, errs.Succ
+}
+
+//GetItemsByUser ...获取当前某农场绑定的传感器列表
+func (t IotSensor) GetItemsByUser(userID int64) ([]*IotSensor, errs.ErrInfo) {
+	var items []*IotSensor
+	err := utils.GetMysqlClient().Where("user_id=?", userID).Find(&items)
+	if err != nil {
+		glog.Errorf("Get items by user %d from %s failed,err:%+v", userID, t.TableName(), err)
+		return nil, errs.ErrDBGet
+	}
+	return items, errs.Succ
+}
+
 //UpdateItemByID ... 根据数据ID，更新该条数据数据
 func (t IotSensor) UpdateItemByID(item *IotSensor) (int64, error) {
 	rows, err := utils.GetMysqlClient().Id(item.Id).Update(item)

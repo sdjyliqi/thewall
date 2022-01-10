@@ -24,8 +24,8 @@ func InitRouter(r *gin.Engine) {
 	r.GET("/field/items", handle.FieldGetItems) //查询某个用户的所属农场
 
 	//todo
-	r.GET("/sensor/itemsbyfield", handle.FieldGetItems) //获取这个农场的senser 列表
-	r.GET("/sensor/delbyfield", handle.FieldGetItems)   //某个农场结束绑定的sensor
-	r.GET("/sensor/itemsbyuser", handle.FieldGetItems)  //当前用户的senser列表
+	r.GET("/sensor/itemsbyfield", handle.GetSensorItemsByField) //获取这个农场的senser 列表
+	r.GET("/sensor/delbyfield", handle.FieldGetItems)           //某个农场结束绑定的sensor
+	r.GET("/sensor/itemsbyuser", handle.FieldGetItems)          //当前用户的senser列表
 
 }
