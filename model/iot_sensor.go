@@ -3,23 +3,26 @@ package model
 import (
 	"errors"
 	"github.com/golang/glog"
+	"thewall/errs"
 	"thewall/utils"
 	"time"
 )
 
-var IotSensorEx IotSensor
+var SensorModel IotSensor
 
 type IotSensor struct {
-	Id           int       `json:"id" xorm:"not null pk INT(11)"`
-	Name         string    `json:"name" xorm:"comment('Name') LONGTEXT"`
-	Code         string    `json:"code" xorm:"comment('Code') LONGTEXT"`
-	DeviceId     int       `json:"device_id" xorm:"comment('Device') index INT(11)"`
-	SensorTypeId int       `json:"sensor_type_id" xorm:"comment('Sensor Type') index INT(11)"`
-	Depth        int       `json:"depth" xorm:"comment('Depth') INT(11)"`
-	CreateUid    int       `json:"create_uid" xorm:"comment('Created by') index INT(11)"`
-	CreateDate   time.Time `json:"create_date" xorm:"comment('Created on') DATETIME"`
-	WriteUid     int       `json:"write_uid" xorm:"comment('Last Updated by') index INT(11)"`
-	WriteDate    time.Time `json:"write_date" xorm:"comment('Last Updated on') DATETIME"`
+	Id              int       `json:"id" xorm:"not null pk autoincr INT(11)"`
+	Name            string    `json:"name" xorm:"comment('Name') LONGTEXT"`
+	FieldId         int       `json:"field_id" xorm:"comment('农场id') INT(11)"`
+	UserId          int       `json:"user_id" xorm:"INT(11)"`
+	GatewayId       int       `json:"gateway_id" xorm:"comment('gateway_id') INT(11)"`
+	SensorTypeId    int       `json:"sensor_type_id" xorm:"comment('Sensor Type') INT(11)"`
+	Depth           int       `json:"depth" xorm:"comment('Depth') INT(11)"`
+	LastRecivedTime time.Time `json:"last_recived_time" xorm:"comment('最后上传数据的时间') DATETIME"`
+	CreateUid       int       `json:"create_uid" xorm:"comment('Created by') INT(11)"`
+	CreateDate      time.Time `json:"create_date" xorm:"comment('Created on') DATETIME"`
+	WriteUid        int       `json:"write_uid" xorm:"comment('Last Updated by') INT(11)"`
+	WriteDate       time.Time `json:"write_date" xorm:"comment('Last Updated on') DATETIME"`
 }
 
 func (t IotSensor) TableName() string {
@@ -63,6 +66,28 @@ func (t IotSensor) GetItemByID(id int64) (*IotSensor, error) {
 	return item, nil
 }
 
+//GetItemsByField ...获取当前某农场绑定的传感器列表
+func (t IotSensor) GetItemsByField(fieldID int) ([]*IotSensor, errs.ErrInfo) {
+	var items []*IotSensor
+	err := utils.GetMysqlClient().Where("field_id=?", fieldID).Find(&items)
+	if err != nil {
+		glog.Errorf("Get items by field %d from %s failed,err:%+v", fieldID, t.TableName(), err)
+		return nil, errs.ErrDBGet
+	}
+	return items, errs.Succ
+}
+
+//GetItemsByUser ...获取当前某农场绑定的传感器列表
+func (t IotSensor) GetItemsByUser(userID int64) ([]*IotSensor, errs.ErrInfo) {
+	var items []*IotSensor
+	err := utils.GetMysqlClient().Where("user_id=?", userID).Find(&items)
+	if err != nil {
+		glog.Errorf("Get items by user %d from %s failed,err:%+v", userID, t.TableName(), err)
+		return nil, errs.ErrDBGet
+	}
+	return items, errs.Succ
+}
+
 //UpdateItemByID ... 根据数据ID，更新该条数据数据
 func (t IotSensor) UpdateItemByID(item *IotSensor) (int64, error) {
 	rows, err := utils.GetMysqlClient().Id(item.Id).Update(item)
@@ -71,4 +96,14 @@ func (t IotSensor) UpdateItemByID(item *IotSensor) (int64, error) {
 		return 0, err
 	}
 	return rows, nil
+}
+
+//AddItem ... 添加一条数据
+func (t IotSensor) AddItem(item *IotSensor) (bool, errs.ErrInfo) {
+	rows, err := utils.GetMysqlClient().InsertOne(item)
+	if err != nil {
+		glog.Errorf("Insert item %+v from table %s failed,err:%+v", item, t.TableName(), err)
+		return false, errs.ErrDBInsert
+	}
+	return rows > 0, errs.Succ
 }

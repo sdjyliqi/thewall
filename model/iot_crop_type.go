@@ -10,10 +10,11 @@ import (
 var IotCropEx IotCropType
 
 type IotCropType struct {
-	Id         int       `json:"id" xorm:"not null pk INT(11)"`
+	Id         int       `json:"id" xorm:"not null pk autoincr INT(11)"`
 	Name       string    `json:"name" xorm:"not null comment('Name') VARCHAR(32)"`
+	NameCn     string    `json:"name_cn" xorm:"comment('中文名') VARCHAR(32)"`
 	Code       string    `json:"code" xorm:"not null comment('Code') VARCHAR(32)"`
-	Madv       float32   `json:"madv" xorm:"comment('madv') FLOAT"`
+	Madv       float32   `json:"madv" xorm:"comment('感觉计算出来的一个值') FLOAT"`
 	CreateUid  int       `json:"create_uid" xorm:"comment('Created by') INT(11)"`
 	CreateDate time.Time `json:"create_date" xorm:"comment('Created on') DATETIME"`
 	WriteUid   int       `json:"write_uid" xorm:"comment('Last Updated by') INT(11)"`

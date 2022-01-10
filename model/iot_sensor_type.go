@@ -3,19 +3,21 @@ package model
 import (
 	"errors"
 	"github.com/golang/glog"
+	"thewall/errs"
 	"thewall/utils"
 	"time"
 )
 
-var IotSensorTypeEx IotSensorType
+var SensorTypeModel IotSensorType
 
 type IotSensorType struct {
 	Id         int       `json:"id" xorm:"not null pk INT(11)"`
-	Name       string    `json:"name" xorm:"comment('Name') LONGTEXT"`
-	Code       string    `json:"code" xorm:"comment('Code') LONGTEXT"`
-	CreateUid  int       `json:"create_uid" xorm:"comment('Created by') index INT(11)"`
+	Name       string    `json:"name" xorm:"comment('Name') VARCHAR(32)"`
+	Code       string    `json:"code" xorm:"comment('Code') VARCHAR(32)"`
+	NameCn     string    `json:"name_cn" xorm:"comment('中文名') VARCHAR(32)"`
+	CreateUid  int       `json:"create_uid" xorm:"comment('Created by') INT(11)"`
 	CreateDate time.Time `json:"create_date" xorm:"comment('Created on') DATETIME"`
-	WriteUid   int       `json:"write_uid" xorm:"comment('Last Updated by') index INT(11)"`
+	WriteUid   int       `json:"write_uid" xorm:"comment('Last Updated by') INT(11)"`
 	WriteDate  time.Time `json:"write_date" xorm:"comment('Last Updated on') DATETIME"`
 }
 
@@ -68,4 +70,14 @@ func (t IotSensorType) UpdateItemByID(item *IotSensorType) (int64, error) {
 		return 0, err
 	}
 	return rows, nil
+}
+
+//AddItem ... 添加一条数据
+func (t IotSensorType) AddItem(item *IotSensorType) (bool, errs.ErrInfo) {
+	rows, err := utils.GetMysqlClient().InsertOne(item)
+	if err != nil {
+		glog.Errorf("Insert item %+v from table %s failed,err:%+v", item, t.TableName(), err)
+		return false, errs.ErrDBInsert
+	}
+	return rows > 0, errs.Succ
 }

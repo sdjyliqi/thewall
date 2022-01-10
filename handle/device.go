@@ -9,7 +9,7 @@ import (
 
 //GetDeviceAllItems ... 获取device全量数据
 func GetDeviceAllItems(c *gin.Context) {
-	items, err := model.IotDeviceEx.GetAllItems()
+	items, err := model.DeviceModel.GetAllItems()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "msg": err.Error(), "data": nil})
 		return
@@ -30,7 +30,7 @@ func GetDeviceItemsByPage(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
 		return
 	}
-	items, err := model.IotDeviceEx.GetItemsByPage(pageId)
+	items, err := model.DeviceModel.GetItemsByPage(pageId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "msg": err.Error(), "data": nil})
 		return

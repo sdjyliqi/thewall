@@ -40,6 +40,20 @@ func (t *IotUc) Login(email, password string) (bool, errs.ErrInfo) {
 	return utils.EncodingPassword(password) == item.Password, errs.Succ
 }
 
+//Login ...查询某用户是否存在
+func (t *IotUc) ChkUserExisted(id int) (bool, errs.ErrInfo) {
+	var item IotUc
+	ok, err := utils.GetMysqlClient().Id(id).Get(&item)
+	if err != nil {
+		glog.Errorf("Get item by id %d from table %s failed,err:%+v", id, t.TableName(), err)
+		return false, errs.ErrDBGet
+	}
+	if !ok {
+		return false, errs.Succ
+	}
+	return true, errs.Succ
+}
+
 //UpdateToken  ...更新token
 func (t *IotUc) UpdateToken(email, token string) errs.ErrInfo {
 	item := IotUc{Email: email, Token: token, LastLogin: time.Now()}
@@ -63,12 +77,12 @@ func (t *IotUc) Register(user IotUc) (bool, errs.ErrInfo) {
 	if ok {
 		return false, errs.ErrUCUserExisted
 	}
-	count, insertErr := utils.GetMysqlClient().InsertOne(user)
+	rows, insertErr := utils.GetMysqlClient().InsertOne(user)
 	if insertErr != nil {
 		glog.Errorf("Insert user %+v from table %s failed,err:%+v", user, t.TableName(), insertErr)
 		return false, errs.ErrDBInsert
 	}
-	return count > 0, errs.Succ
+	return rows > 0, errs.Succ
 }
 
 //ResetPassword  ...重置密码

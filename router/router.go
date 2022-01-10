@@ -12,9 +12,20 @@ func InitRouter(r *gin.Engine) {
 	r.POST("/uc/reset", handle.UCResetPassword) //充值密码，包括用户注册邮件、新密码、验证码三个维度数据
 	r.GET("/uc/code", handle.UCGetCode)         //获取验证码
 
-	r.GET("/crop/items", handle.GetCropAllItems)
-	r.GET("/crop/page", handle.GetCropItemsByPage) //
+	r.GET("/crop/type/items", handle.GetCropTypeAllItems)   //获取农作物类型
+	r.GET("/crop/type/page", handle.GetCropTypeItemsByPage) //分页获取农作物类型
 
 	r.GET("/device/items", handle.GetDeviceAllItems)
 	r.GET("/device/page", handle.GetDeviceItemsByPage)
+
+	r.POST("/field/add", handle.FieldAdd)       //某用户增加农场
+	r.POST("/field/edit", handle.FieldEdit)     //修改农场信息
+	r.POST("/field/del", handle.FieldDel)       //某用户删除农场信息
+	r.GET("/field/items", handle.FieldGetItems) //查询某个用户的所属农场
+
+	//todo
+	r.GET("/sensor/itemsbyfield", handle.GetSensorItemsByField) //获取这个农场的senser 列表，写完了
+	r.GET("/sensor/delbyfield", handle.FieldGetItems)           //某个农场结束绑定的sensor
+	r.GET("/sensor/itemsbyuser", handle.GetSensorItemsByUser)   //当前用户的senser列表，写完了
+
 }
