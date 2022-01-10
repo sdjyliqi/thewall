@@ -74,3 +74,20 @@ func GetSensorItemsByField(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": items})
 	return
 }
+
+//GetSensorItemsByUser ... 获取某用户的传感器列表
+func GetSensorItemsByUser(c *gin.Context) {
+	strUID, _ := c.GetQuery("user_id")
+	if strUID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
+		return
+	}
+	UID := utils.Convert2Int(strUID)
+	items, errEx := model.SensorModel.GetItemsByUser(UID)
+	if errEx != errs.Succ {
+		c.JSON(http.StatusOK, gin.H{"code": errEx.Code, "msg": errEx.MessageEN, "data": nil})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": items})
+	return
+}
