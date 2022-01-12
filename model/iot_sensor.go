@@ -107,3 +107,32 @@ func (t IotSensor) AddItem(item *IotSensor) (bool, errs.ErrInfo) {
 	}
 	return rows > 0, errs.Succ
 }
+
+//SensorBindFiled ...重新绑定某地的传感器
+func (t IotSensor) SensorBindFiled(sensorIDs []int, field, userID int) errs.ErrInfo {
+	//先根据field的sensor实施重置，接触绑定
+	unbindSensor := &IotSensor{
+		FieldId:    0,
+		CreateDate: time.Now(),
+		WriteDate:  time.Now(),
+	}
+	cols := []string{"field_id", "create_date", "write_date"}
+	_, err := utils.GetMysqlClient().Cols(cols...).Where("field_id=?", field).Update(unbindSensor)
+	if err != nil {
+		glog.Errorf("Update items by field_id %d from %s failed,err:%+v", field, t.TableName(), err)
+		return errs.ErrDBUpdate
+	}
+	//重新针对sensor的id 实施绑定
+	bindSensor := &IotSensor{
+		FieldId:    field,
+		UserId:     userID,
+		CreateDate: time.Now(),
+		WriteDate:  time.Now(),
+	}
+	_, err = utils.GetMysqlClient().Cols(cols...).In("id", sensorIDs).Update(bindSensor)
+	if err != nil {
+		glog.Errorf("Update items by field_ids %+v from %s failed,err:%+v", sensorIDs, t.TableName(), err)
+		return errs.ErrDBUpdate
+	}
+	return errs.Succ
+}

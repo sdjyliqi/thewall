@@ -42,16 +42,16 @@ func (t IotField) TableName() string {
 }
 
 //AddFieldByUser ... 用户增加土地
-func (t IotField) AddFieldByUser(item *IotField) errs.ErrInfo {
+func (t IotField) AddFieldByUser(item *IotField) (*IotField, errs.ErrInfo) {
 	//Todo，后续需要去重，条件需要沟通
 	item.CreateDate = time.Now()
 	item.WriteDate = time.Now()
 	_, err := utils.GetMysqlClient().Insert(item)
 	if err != nil {
 		glog.Errorf("Insert the item %+v to table %s failed,err:%+v", *item, t.TableName(), err)
-		return errs.ErrDBInsert
+		return nil, errs.ErrDBInsert
 	}
-	return errs.Succ
+	return item, errs.Succ
 }
 
 //EditField ... 用户增加土地

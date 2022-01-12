@@ -54,8 +54,13 @@ func FieldAdd(c *gin.Context) {
 		CreateDate:    time.Now(),
 		WriteDate:     time.Now(),
 	}
-	addErr := model.IotFieldEx.AddFieldByUser(addItem)
+	dbNode, addErr := model.IotFieldEx.AddFieldByUser(addItem)
 	if addErr != errs.Succ {
+		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
+		return
+	}
+	errEX := model.SensorModel.SensorBindFiled(item.Sensors, dbNode.Id, item.UserID)
+	if errEX != errs.Succ {
 		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
 		return
 	}
@@ -92,8 +97,13 @@ func FieldEdit(c *gin.Context) {
 		CreateUid:  item.UserID,
 		WriteDate:  time.Now(),
 	}
-	addErr := model.IotFieldEx.EditField(addItem)
-	if addErr != errs.Succ {
+	errEx := model.IotFieldEx.EditField(addItem)
+	if errEx != errs.Succ {
+		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
+		return
+	}
+	errEX := model.SensorModel.SensorBindFiled(item.Sensors, item.Id, item.UserID)
+	if errEX != errs.Succ {
 		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
 		return
 	}
