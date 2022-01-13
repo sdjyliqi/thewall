@@ -136,3 +136,27 @@ func (t IotSensor) SensorBindFiled(sensorIDs []int, field, userID int) errs.ErrI
 	}
 	return errs.Succ
 }
+
+//SensorBindGateway ...重新绑定网关
+func (t IotSensor) SensorBindGateway(sensorIDs []int, gatewayId, userID int) errs.ErrInfo {
+	//先根据sensor绑定的userID和要绑定网关的sensorIDs查出ids
+	var ids []int
+	err := utils.GetMysqlClient().Select("id").In("id", sensorIDs).And("user_id=?", userID).Find(&ids)
+	if err != nil {
+		glog.Errorf("Get items by user %d from %s failed,err:%+v", userID, t.TableName(), err)
+		return errs.ErrDBGet
+	}
+	//重新针对查询结果sensor的ids更新绑定网关
+	cols := []string{"gateway_id", "create_date", "write_date"}
+	bindSensor := &IotSensor{
+		FieldId:    gatewayId,
+		CreateDate: time.Now(),
+		WriteDate:  time.Now(),
+	}
+	_, err = utils.GetMysqlClient().Cols(cols...).In("id", ids).Update(bindSensor)
+	if err != nil {
+		glog.Errorf("Update items by field_ids %+v from %s failed,err:%+v", sensorIDs, t.TableName(), err)
+		return errs.ErrDBUpdate
+	}
+	return errs.Succ
+}

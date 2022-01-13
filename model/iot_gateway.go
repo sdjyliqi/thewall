@@ -65,13 +65,13 @@ func (t IotGateway) GetItemByID(id int64) (*IotGateway, error) {
 }
 
 //UpdateItemByID ... 根据数据ID，更新该条数据数据
-func (t IotGateway) UpdateItemByID(item *IotGateway) (int64, error) {
+func (t IotGateway) UpdateItemByID(item *IotGateway) (bool, errs.ErrInfo) {
 	rows, err := utils.GetMysqlClient().Id(item.Id).Update(item)
 	if err != nil {
 		glog.Errorf("Update the item %+v from %s failed,err:%+v", item, t.TableName(), err)
-		return 0, err
+		return false, errs.ErrDBUpdate
 	}
-	return rows, nil
+	return rows > 0, errs.Succ
 }
 
 //AddItem ... 添加一条数据

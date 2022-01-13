@@ -56,3 +56,37 @@ func AddGateway(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": ok})
 	return
 }
+
+//EditGateway ... 编辑一条Gateway数据
+func EditGateway(c *gin.Context) {
+	item := model.IotGateway{}
+	bindErr := c.BindJSON(&item)
+	if bindErr != nil {
+		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	ok, err := model.GatewayModel.UpdateItemByID(&item)
+	if err != errs.Succ {
+		c.JSON(http.StatusOK, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": ok})
+	return
+}
+
+//BindGatewayByUser ... Gateway绑定用户
+func BindGatewayByUser(c *gin.Context) {
+	item := model.IotGateway{}
+	bindErr := c.BindJSON(&item)
+	if bindErr != nil {
+		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	ok, err := model.GatewayModel.UpdateItemByID(&item)
+	if err != errs.Succ {
+		c.JSON(http.StatusOK, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": ok})
+	return
+}
