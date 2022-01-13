@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-xorm/xorm"
 	"github.com/golang/glog"
 	"thewall/errs"
 	"thewall/utils"
@@ -78,6 +79,24 @@ func (t *IotUc) Register(user IotUc) (bool, errs.ErrInfo) {
 		return false, errs.ErrUCUserExisted
 	}
 	rows, insertErr := utils.GetMysqlClient().InsertOne(user)
+	if insertErr != nil {
+		glog.Errorf("Insert user %+v from table %s failed,err:%+v", user, t.TableName(), insertErr)
+		return false, errs.ErrDBInsert
+	}
+	return rows > 0, errs.Succ
+}
+
+func (t *IotUc) RegisterSession(sess *xorm.Session, user IotUc) (bool, errs.ErrInfo) {
+	var item IotUc
+	ok, err := sess.Where(fmt.Sprintf("email='%s'", user.Email)).Or(fmt.Sprintf("nickname='%s'", user.Nickname)).Get(&item)
+	if err != nil {
+		glog.Errorf("Get item by email %s or nickname %s from table %s failed,err:%+v", user.Email, user.Nickname, t.TableName(), err)
+		return false, errs.ErrDBGet
+	}
+	if ok {
+		return false, errs.ErrUCUserExisted
+	}
+	rows, insertErr := sess.InsertOne(user)
 	if insertErr != nil {
 		glog.Errorf("Insert user %+v from table %s failed,err:%+v", user, t.TableName(), insertErr)
 		return false, errs.ErrDBInsert
