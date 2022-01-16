@@ -28,8 +28,12 @@ func InitRouter(r *gin.Engine) {
 	r.GET("/sensor/delbyfield", handle.FieldGetItems)           //某个农场结束绑定的sensor
 	r.GET("/sensor/itemsbyuser", handle.GetSensorItemsByUser)   //当前用户的senser列表，写完了
 
-	r.GET("/gateway/items", handle.GetGatewayAllItems)      //获取网关列表
-	r.POST("/gateway/add", handle.AddGateway)               //添加网关
-	r.POST("/gateway/edit", handle.EditGateway)             //修改网关
-	r.POST("/gateway/bindByUser", handle.BindGatewayByUser) //网关绑定用户
+	r.GET("/gateway/itemsByPage", handle.GetGatewayItemsByPage) //后台分页获取Gateway列表
+	r.GET("/gateway/item", handle.GetGatewayItem)               //后台获取Gateway信息
+	r.POST("/gateway/add", handle.AddGateway)                   //后台添加Gateway
+	r.POST("/gateway/edit", handle.EditGateway)                 //后台修改Gateway
+	r.GET("/gateway/itemsByUser", handle.GetGatewayItemsByUser) //APP用户获取绑定的网关列表
+	r.GET("/gateway/itemByUser", handle.GetGatewayItemByUser)   //APP用户获取Gateway信息
+	r.POST("/gateway/bindByUser", handle.BindGatewayByUser)     //APP用户绑定Gateway
+	r.POST("/gateway/editByUser", handle.EditGatewayByUser)     //APP用户修改Gateway
 }

@@ -112,26 +112,25 @@ func (t IotSensor) AddItem(item *IotSensor) (bool, errs.ErrInfo) {
 func (t IotSensor) SensorBindFiled(sensorIDs []int, field, userID int) errs.ErrInfo {
 	//先根据field的sensor实施重置，接触绑定
 	unbindSensor := &IotSensor{
-		FieldId:    0,
-		CreateDate: time.Now(),
-		WriteDate:  time.Now(),
+		FieldId:   0,
+		WriteUid:  userID,
+		WriteDate: time.Now(),
 	}
-	cols := []string{"field_id", "create_date", "write_date"}
-	_, err := utils.GetMysqlClient().Cols(cols...).Where("field_id=?", field).Update(unbindSensor)
+	cols := []string{"field_id", "write_uid", "write_date"}
+	_, err := utils.GetMysqlClient().Cols(cols...).Where("field_id=?", field).And("user_id=?", userID).Update(unbindSensor)
 	if err != nil {
 		glog.Errorf("Update items by field_id %d from %s failed,err:%+v", field, t.TableName(), err)
 		return errs.ErrDBUpdate
 	}
 	//重新针对sensor的id 实施绑定
 	bindSensor := &IotSensor{
-		FieldId:    field,
-		UserId:     userID,
-		CreateDate: time.Now(),
-		WriteDate:  time.Now(),
+		FieldId:   field,
+		WriteUid:  userID,
+		WriteDate: time.Now(),
 	}
-	_, err = utils.GetMysqlClient().Cols(cols...).In("id", sensorIDs).Update(bindSensor)
+	_, err = utils.GetMysqlClient().Cols(cols...).In("id", sensorIDs).And("user_id=?", userID).Update(bindSensor)
 	if err != nil {
-		glog.Errorf("Update items by field_ids %+v from %s failed,err:%+v", sensorIDs, t.TableName(), err)
+		glog.Errorf("Update items by ids %+v from %s failed,err:%+v", sensorIDs, t.TableName(), err)
 		return errs.ErrDBUpdate
 	}
 	return errs.Succ
@@ -139,23 +138,27 @@ func (t IotSensor) SensorBindFiled(sensorIDs []int, field, userID int) errs.ErrI
 
 //SensorBindGateway ...重新绑定网关
 func (t IotSensor) SensorBindGateway(sensorIDs []int, gatewayId, userID int) errs.ErrInfo {
-	//先根据sensor绑定的userID和要绑定网关的sensorIDs查出ids
-	var ids []int
-	err := utils.GetMysqlClient().Select("id").In("id", sensorIDs).And("user_id=?", userID).Find(&ids)
-	if err != nil {
-		glog.Errorf("Get items by user %d from %s failed,err:%+v", userID, t.TableName(), err)
-		return errs.ErrDBGet
+	//先根据GatewayId解除绑定
+	unbindSensor := &IotSensor{
+		GatewayId: 0,
+		WriteUid:  userID,
+		WriteDate: time.Now(),
 	}
-	//重新针对查询结果sensor的ids更新绑定网关
-	cols := []string{"gateway_id", "create_date", "write_date"}
+	cols := []string{"gateway_id", "write_uid", "write_date"}
+	_, err := utils.GetMysqlClient().Cols(cols...).Where("gateway_id=?", gatewayId).And("user_id=?", userID).Update(unbindSensor)
+	if err != nil {
+		glog.Errorf("Update items by gateway_id %d from %s failed,err:%+v", gatewayId, t.TableName(), err)
+		return errs.ErrDBUpdate
+	}
+	//重新绑定sensorIDs的GatewayId
 	bindSensor := &IotSensor{
-		FieldId:    gatewayId,
-		CreateDate: time.Now(),
-		WriteDate:  time.Now(),
+		GatewayId: gatewayId,
+		WriteUid:  userID,
+		WriteDate: time.Now(),
 	}
-	_, err = utils.GetMysqlClient().Cols(cols...).In("id", ids).Update(bindSensor)
+	_, err = utils.GetMysqlClient().Cols(cols...).In("id", sensorIDs).And("user_id=?", userID).Update(bindSensor)
 	if err != nil {
-		glog.Errorf("Update items by field_ids %+v from %s failed,err:%+v", sensorIDs, t.TableName(), err)
+		glog.Errorf("Update items by ids %+v from %s failed,err:%+v", sensorIDs, t.TableName(), err)
 		return errs.ErrDBUpdate
 	}
 	return errs.Succ

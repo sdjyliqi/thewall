@@ -41,7 +41,7 @@ func (t *IotUc) Login(email, password string) (bool, errs.ErrInfo) {
 	return utils.EncodingPassword(password) == item.Password, errs.Succ
 }
 
-//Login ...查询某用户是否存在
+//ChkUserExisted ...查询某用户是否存在
 func (t *IotUc) ChkUserExisted(id int) (bool, errs.ErrInfo) {
 	var item IotUc
 	ok, err := utils.GetMysqlClient().Id(id).Get(&item)
