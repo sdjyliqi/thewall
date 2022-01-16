@@ -21,3 +21,9 @@ func Test_IotSensorGetItemsByUser(t *testing.T) {
 		t.Log(v)
 	}
 }
+
+func Test_GetItemByID(t *testing.T) {
+	item, err := SensorModel.GetItemByID(1)
+	t.Log(err)
+	t.Log(item)
+}

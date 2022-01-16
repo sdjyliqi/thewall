@@ -3,9 +3,9 @@ package handle
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 	"thewall/errs"
 	"thewall/model"
+	"thewall/utils"
 )
 
 type GatewayDto struct {
@@ -22,9 +22,9 @@ type GatewayDto struct {
 //GetGatewayItemsByUser ... APP获取用户绑定的Gateway列表数据
 func GetGatewayItemsByUser(c *gin.Context) {
 	strUserId, _ := c.GetQuery("user_id")
-	userId, errConv := strconv.Atoi(strUserId)
-	if errConv != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
+	userId := utils.Convert2Int(strUserId)
+	if userId <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
 	items, err := model.GatewayModel.GetItemsByUser(userId)
@@ -40,12 +40,12 @@ func GetGatewayItemsByUser(c *gin.Context) {
 func GetGatewayItemsByPage(c *gin.Context) {
 	strPage, _ := c.GetQuery("page")
 	if strPage == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
-	pageId, errConv := strconv.Atoi(strPage)
-	if errConv != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
+	pageId := utils.Convert2Int(strPage)
+	if pageId < 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
 	items, err := model.GatewayModel.GetItemsByPage(pageId)
@@ -61,12 +61,12 @@ func GetGatewayItemsByPage(c *gin.Context) {
 func GetGatewayItem(c *gin.Context) {
 	strId, _ := c.GetQuery("id")
 	if strId == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
-	id, errConv := strconv.Atoi(strId)
-	if errConv != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
+	id := utils.Convert2Int(strId)
+	if id <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
 	item, err := model.GatewayModel.GetItemByID(id)
@@ -83,17 +83,13 @@ func GetGatewayItemByUser(c *gin.Context) {
 	strId, _ := c.GetQuery("id")
 	strUserId, _ := c.GetQuery("user_id")
 	if strId == "" || strUserId == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
-	id, errConv := strconv.Atoi(strId)
-	if errConv != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
-		return
-	}
-	userId, errConv := strconv.Atoi(strUserId)
-	if errConv != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
+	id := utils.Convert2Int(strId)
+	userId := utils.Convert2Int(strUserId)
+	if id <= 0 || userId <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
 	item, err := model.GatewayModel.GetItemByUser(id, userId)
@@ -196,13 +192,38 @@ func EditGatewayByUser(c *gin.Context) {
 
 //BindGatewayByUser ... APP用户绑定Gateway
 func BindGatewayByUser(c *gin.Context) {
-	item := model.IotGateway{}
-	bindErr := c.BindJSON(&item)
+	itemDto := GatewayDto{}
+	bindErr := c.BindJSON(&itemDto)
 	if bindErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
-	ok, err := model.GatewayModel.BindItemByUser(item.Code, item.UserId)
+	if itemDto.Code == "" || itemDto.UserId <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	ok, err := model.GatewayModel.BindItemByUser(itemDto.Code, itemDto.UserId)
+	if err != errs.Succ {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": ok})
+	return
+}
+
+//UnbindGatewayByUser ... APP用户解绑
+func UnbindGatewayByUser(c *gin.Context) {
+	itemDto := GatewayDto{}
+	bindErr := c.BindJSON(&itemDto)
+	if bindErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	if itemDto.Id <= 0 || itemDto.UserId <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	ok, err := model.GatewayModel.UnbindItemByUser(itemDto.Id, itemDto.UserId)
 	if err != errs.Succ {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
 		return

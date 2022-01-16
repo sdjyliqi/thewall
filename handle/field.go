@@ -54,7 +54,7 @@ func FieldAdd(c *gin.Context) {
 		CreateDate:    time.Now(),
 		WriteDate:     time.Now(),
 	}
-	dbNode, addErr := model.IotFieldEx.AddFieldByUser(addItem)
+	dbNode, addErr := model.FieldModel.AddFieldByUser(addItem)
 	if addErr != errs.Succ {
 		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
 		return
@@ -97,7 +97,7 @@ func FieldEdit(c *gin.Context) {
 		CreateUid:  item.UserID,
 		WriteDate:  time.Now(),
 	}
-	errEx := model.IotFieldEx.EditField(addItem)
+	errEx := model.FieldModel.EditField(addItem)
 	if errEx != errs.Succ {
 		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
 		return
@@ -123,7 +123,7 @@ func FieldDel(c *gin.Context) {
 	//获取用户id
 	uid := utils.Convert2Int(strUID)
 	fid := utils.Convert2Int(strFID)
-	errEx := model.IotFieldEx.DelField(fid, uid)
+	errEx := model.FieldModel.DelField(fid, uid)
 	if errEx != errs.Succ {
 		c.JSON(http.StatusOK, gin.H{"code": errEx.Code, "msg": errEx.MessageEN, "data": nil})
 		return
@@ -143,7 +143,7 @@ func FieldGetItems(c *gin.Context) {
 	//获取用户id
 	id := utils.Convert2Int(userID)
 	//根据用户id 查找所属田地信息
-	items, errEx := model.IotFieldEx.GetItemsByUser(id)
+	items, errEx := model.FieldModel.GetItemsByUser(id)
 	if errEx != errs.Succ {
 		c.JSON(http.StatusOK, gin.H{"code": errEx.Code, "msg": errEx.MessageEN, "data": nil})
 		return

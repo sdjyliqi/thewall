@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var IotFieldEx IotField
+var FieldModel IotField
 
 //IotField ... 土地基本信息
 type IotField struct {

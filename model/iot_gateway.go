@@ -133,6 +133,27 @@ func (t IotGateway) BindItemByUser(code string, userID int) (bool, errs.ErrInfo)
 	return rows > 0, errs.Succ
 }
 
+//UnbindItemByUser ... APP用户解绑
+func (t IotGateway) UnbindItemByUser(id, userID int) (bool, errs.ErrInfo) {
+	if id <= 0 || userID <= 0 {
+		return false, errs.ErrBadRequest
+	}
+	cols := []string{"user_id", "longitude", "latitude", "write_uid", "write_date"}
+	updateItem := &IotGateway{
+		UserId:    0,
+		Longitude: 0,
+		Latitude:  0,
+		WriteUid:  userID,
+		WriteDate: time.Now(),
+	}
+	rows, err := utils.GetMysqlClient().Cols(cols...).ID(id).And("user_id=?", userID).Update(updateItem)
+	if err != nil {
+		glog.Errorf("Update the item %+v from %s failed,err:%+v", updateItem, t.TableName(), err)
+		return false, errs.ErrDBUpdate
+	}
+	return rows > 0, errs.Succ
+}
+
 //AddItem ... 后台添加一条数据
 func (t IotGateway) AddItem(item *IotGateway) (bool, errs.ErrInfo) {
 	item.CreateDate = time.Now()
