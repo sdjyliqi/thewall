@@ -7,6 +7,7 @@ import (
 	"thewall/errs"
 	"thewall/model"
 	"thewall/utils"
+	"time"
 )
 
 type SensorDto struct {
@@ -18,6 +19,12 @@ type SensorDto struct {
 	GatewayId    int    `json:"gateway_id"`
 	SensorTypeId int    `json:"sensor_type_id"`
 	Depth        int    `json:"depth"`
+}
+
+type SensorGather struct {
+	SensorID     int    `json:"sensor_id"`
+	EtlTimeStamp string `json:"etl_timestamp"`
+	Value        int    `json:"value"`
 }
 
 //GetSensorAllItems ... 获取Sensor全量数据
@@ -210,6 +217,44 @@ func EditSensorByUser(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": ok})
+	return
+}
+
+//GatherData ... 添加一个传感器采集的数据
+func GatherData(c *gin.Context) {
+	item := SensorGather{}
+	bindErr := c.BindJSON(&item)
+	if bindErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	if item.SensorID <= 0 || item.EtlTimeStamp == "" || item.Value <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	sensorItem, errEX := model.SensorModel.GetItemID(item.SensorID)
+	if errEX != errs.Succ || sensorItem == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errEX.Code, "msg": errEX.MessageEN, "data": nil})
+		return
+	}
+	value := model.IotValue{
+		EtlTimestamp: utils.Convert2Int(item.EtlTimeStamp),
+		FieldId:      sensorItem.FieldId,
+		SensorId:     item.SensorID,
+		SensorTypeId: sensorItem.SensorTypeId,
+		Depth:        sensorItem.Depth,
+		Value:        item.Value,
+		CreateUid:    0,
+		CreateDate:   time.Now(),
+		WriteUid:     0,
+		WriteDate:    time.Now(),
+	}
+	ok, err := model.IotValueModel.AddItem(&value)
+	if err != errs.Succ {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": ok})
 	return
 }

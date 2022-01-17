@@ -38,6 +38,13 @@ type SensorExtend struct {
 	GatewayCode string `json:"gateway_code"`
 }
 
+//SensorWithType ...查询传感器的类型等基本信息
+type SensorWithType struct {
+	IotSensor  `xorm:"extends"`
+	IotField   `xorm:"extends"`
+	IotGateway `xorm:"extends"`
+}
+
 func (t IotSensor) TableName() string {
 	return "iot_sensor"
 }
@@ -66,6 +73,17 @@ func (t IotSensor) GetItemsByPage(pageID int) ([]*IotSensor, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+//GetItemID ...根据ID获取对应某条记录
+func (t IotSensor) GetItemID(id int) (*IotSensor, errs.ErrInfo) {
+	item := IotSensor{}
+	_, err := utils.GetMysqlClient().ID(id).Get(&item)
+	if err != nil {
+		glog.Errorf("Get the item by id %d from %s failed,err:%+v", id, t.TableName(), err)
+		return nil, errs.ErrDBGet
+	}
+	return &item, errs.Succ
 }
 
 //GetItemByID ...根据ID获取对应某条记录
@@ -147,6 +165,8 @@ func (t IotSensor) UpdateItemByUser(item *IotSensor) (bool, errs.ErrInfo) {
 
 //AddItem ... 添加一条数据
 func (t IotSensor) AddItem(item *IotSensor) (bool, errs.ErrInfo) {
+	item.WriteDate = time.Now()
+	item.LastRecivedTime = time.Now()
 	rows, err := utils.GetMysqlClient().InsertOne(item)
 	if err != nil {
 		glog.Errorf("Insert item %+v from table %s failed,err:%+v", item, t.TableName(), err)

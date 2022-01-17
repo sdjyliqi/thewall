@@ -30,6 +30,7 @@ func InitRouter(r *gin.Engine) {
 	r.POST("/sensor/bindByUser", handle.BindSensorByUser)           //APP用户绑定Sensor
 	r.POST("/sensor/unbindByUser", handle.UnbindSensorByUser)       //APP用户解绑Sensor
 	r.POST("/sensor/editByUser", handle.EditSensorByUser)           //APP用户修改Sensor信息
+	r.POST("/sensor/gather", handle.GatherData)                     //收集一次上报数据
 
 	r.GET("/gateway/itemsByPage", handle.GetGatewayItemsByPage) //后台分页获取Gateway列表
 	r.GET("/gateway/item", handle.GetGatewayItem)               //后台获取Gateway信息

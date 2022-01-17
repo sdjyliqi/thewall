@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+var IotValueModel IotValue
+
 type IotValue struct {
 	Id           int       `json:"id" xorm:"not null pk autoincr INT(11)"`
 	EtlTimestamp int       `json:"etl_timestamp" xorm:"not null comment('Etl Time') INT(11)"`
@@ -43,6 +45,7 @@ func (t IotValue) GetItemsByPage(pageID int) ([]*IotValue, error) {
 
 //AddItem ... 添加一条数据
 func (t IotValue) AddItem(item *IotValue) (bool, errs.ErrInfo) {
+	item.WriteDate = time.Now()
 	rows, err := utils.GetMysqlClient().InsertOne(item)
 	if err != nil {
 		glog.Errorf("Insert item %+v from table %s failed,err:%+v", item, t.TableName(), err)
