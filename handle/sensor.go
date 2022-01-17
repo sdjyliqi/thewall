@@ -9,6 +9,17 @@ import (
 	"thewall/utils"
 )
 
+type SensorDto struct {
+	Id           int    `json:"id"`
+	Name         string `json:"name"`
+	Code         string `json:"code"`
+	FieldId      int    `json:"field_id"`
+	UserId       int    `json:"user_id"`
+	GatewayId    int    `json:"gateway_id"`
+	SensorTypeId int    `json:"sensor_type_id"`
+	Depth        int    `json:"depth"`
+}
+
 //GetSensorAllItems ... 获取Sensor全量数据
 func GetSensorAllItems(c *gin.Context) {
 	items, err := model.SensorModel.GetAllItems()
@@ -24,12 +35,12 @@ func GetSensorAllItems(c *gin.Context) {
 func GetSensorItemsByPage(c *gin.Context) {
 	strPage, _ := c.GetQuery("page")
 	if strPage == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
 	pageId, err := strconv.Atoi(strPage)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
 	items, err := model.SensorModel.GetItemsByPage(pageId)
@@ -46,29 +57,50 @@ func AddSensor(c *gin.Context) {
 	item := model.IotSensor{}
 	bindErr := c.BindJSON(&item)
 	if bindErr != nil {
-		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
 	ok, err := model.SensorModel.AddItem(&item)
 	if err != errs.Succ {
-		c.JSON(http.StatusOK, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
+		c.JSON(http.StatusInternalServerError, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": ok})
 	return
 }
 
-//GetSensorItemsByField ... 获取某地的绑定的传感器列表
+//GetSensorItemsByField ... 获取绑定Field的传感器列表
 func GetSensorItemsByField(c *gin.Context) {
 	strField, _ := c.GetQuery("field_id")
 	if strField == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
 	FID := utils.Convert2Int(strField)
 	items, errEx := model.SensorModel.GetItemsByField(FID)
 	if errEx != errs.Succ {
-		c.JSON(http.StatusOK, gin.H{"code": errEx.Code, "msg": errEx.MessageEN, "data": nil})
+		c.JSON(http.StatusInternalServerError, gin.H{"code": errEx.Code, "msg": errEx.MessageEN, "data": nil})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": items})
+	return
+}
+
+//GetSensorItemsByGateway ... 获取绑定Gateway的传感器列表
+func GetSensorItemsByGateway(c *gin.Context) {
+	strGatewayId, _ := c.GetQuery("gateway_id")
+	if strGatewayId == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	gatewayId := utils.Convert2Int(strGatewayId)
+	if gatewayId <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	items, errEx := model.SensorModel.GetItemsByGateway(gatewayId)
+	if errEx != errs.Succ {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": errEx.Code, "msg": errEx.MessageEN, "data": nil})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": items})
@@ -79,15 +111,105 @@ func GetSensorItemsByField(c *gin.Context) {
 func GetSensorItemsByUser(c *gin.Context) {
 	strUID, _ := c.GetQuery("user_id")
 	if strUID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
 	UID := utils.Convert2Int(strUID)
 	items, errEx := model.SensorModel.GetItemsByUser(UID)
 	if errEx != errs.Succ {
-		c.JSON(http.StatusOK, gin.H{"code": errEx.Code, "msg": errEx.MessageEN, "data": nil})
+		c.JSON(http.StatusInternalServerError, gin.H{"code": errEx.Code, "msg": errEx.MessageEN, "data": nil})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": items})
+	return
+}
+
+//GetSensorItem ... 获取Sensor信息
+func GetSensorItem(c *gin.Context) {
+	strId, _ := c.GetQuery("id")
+	if strId == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	id := utils.Convert2Int(strId)
+	if id <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	item, err := model.SensorModel.GetItemByID(id)
+	if err != errs.Succ {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": item})
+	return
+}
+
+//BindSensorByUser ... APP用户绑定Sensor
+func BindSensorByUser(c *gin.Context) {
+	itemDto := SensorDto{}
+	bindErr := c.BindJSON(&itemDto)
+	if bindErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	if itemDto.Code == "" || itemDto.UserId <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	ok, err := model.SensorModel.BindItemByUser(itemDto.Code, itemDto.UserId)
+	if err != errs.Succ {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": ok})
+	return
+}
+
+//UnbindSensorByUser ... APP用户解绑
+func UnbindSensorByUser(c *gin.Context) {
+	itemDto := SensorDto{}
+	bindErr := c.BindJSON(&itemDto)
+	if bindErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	if itemDto.Id <= 0 || itemDto.UserId <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	ok, err := model.SensorModel.UnbindItemByUser(itemDto.Id, itemDto.UserId)
+	if err != errs.Succ {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": ok})
+	return
+}
+
+//EditSensorByUser ... APP编辑一条Sensor数据
+func EditSensorByUser(c *gin.Context) {
+	itemDto := SensorDto{}
+	bindErr := c.BindJSON(&itemDto)
+	if bindErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	if itemDto.Id <= 0 || itemDto.UserId <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	item := model.IotSensor{
+		Id:     itemDto.Id,
+		UserId: itemDto.UserId,
+		Depth:  itemDto.Depth,
+	}
+	ok, err := model.SensorModel.UpdateItemByUser(&item)
+	if err != errs.Succ {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": ok})
 	return
 }
