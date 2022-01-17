@@ -16,6 +16,7 @@ func init() {
 	if ymlPath == "" {
 		log.Println("You must input path of the yml ....")
 	}
+
 }
 
 func main() {

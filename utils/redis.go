@@ -13,6 +13,7 @@ var (
 
 //InitRedis ...初始化redis，记得要先解密
 func InitRedis(addr string, password string) (*redis.Client, error) {
+	fmt.Println("Init redis ", addr, password)
 	redisClient = redis.NewClient(&redis.Options{
 		Addr:     addr,
 		Password: password,
@@ -23,8 +24,6 @@ func InitRedis(addr string, password string) (*redis.Client, error) {
 	if err != nil {
 		glog.Infof("[init] Initialize redis client failed,please check the addr:%+v,err:%+v", addr, err)
 	}
-
-	fmt.Println("Init redis:", addr, redisClient)
 	return redisClient, err
 }
 
