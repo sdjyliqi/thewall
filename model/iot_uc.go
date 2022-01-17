@@ -106,22 +106,13 @@ func (t *IotUc) RegisterSession(sess *xorm.Session, user IotUc) (bool, errs.ErrI
 
 //ResetPassword  ...重置密码
 func (t *IotUc) ResetPassword(user IotUc) (bool, errs.ErrInfo) {
-	var item IotUc
-	ok, err := utils.GetMysqlClient().Where(fmt.Sprintf("email='%s'", user.Email)).Get(&item)
-	if err != nil {
-		glog.Errorf("Get item by email %s from table %s failed,err:%+v", user.Email, t.TableName(), err)
-		return false, errs.ErrDBGet
-	}
-	if !ok {
-		return false, errs.ErrUCNoUser
-	}
 	//设置新密码
-	item.Password = user.Password
+	user.Desc = "更新密码"
 	//设置一下影响的列
-	cols := []string{"password"}
-	count, updateErr := utils.GetMysqlClient().Cols(cols...).ID(item.Id).Update(item)
+	cols := []string{"password", "desc"}
+	count, updateErr := utils.GetMysqlClient().Cols(cols...).Where("email=?", user.Email).Update(&user)
 	if updateErr != nil {
-		glog.Errorf("Update item  %+v from table %s failed,err:%+v", item, t.TableName(), updateErr)
+		glog.Errorf("Update item  %+v from table %s failed,err:%+v", user, t.TableName(), updateErr)
 		return false, errs.ErrDBUpdate
 	}
 	return count > 0, errs.Succ
