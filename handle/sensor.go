@@ -133,7 +133,7 @@ func GetSensorItemsByUser(c *gin.Context) {
 
 //GetSensorItem ... 获取Sensor信息
 func GetSensorItem(c *gin.Context) {
-	strId, _ := c.GetQuery("id")
+	strId, _ := c.GetQuery("sensor_id")
 	if strId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
@@ -256,5 +256,25 @@ func GatherData(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": ok})
+	return
+}
+
+//GetLineItems ... 获取Sensor信息
+func GetLineItems(c *gin.Context) {
+	strId, _ := c.GetQuery("sensor_id")
+	strStart, _ := c.GetQuery("start")
+	strEnd, _ := c.GetQuery("end")
+	if strId == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	sensorID := utils.Convert2Int(strId)
+	startTS, stopTS := utils.Convert2Int64(strStart), utils.Convert2Int64(strEnd)
+	items, err := model.IotValueModel.GetLineItems(sensorID, startTS, stopTS)
+	if err != errs.Succ {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": items})
 	return
 }

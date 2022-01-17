@@ -53,3 +53,19 @@ func (t IotValue) AddItem(item *IotValue) (bool, errs.ErrInfo) {
 	}
 	return rows > 0, errs.Succ
 }
+
+//GetLineItems  ...获取某个传感器的时间区间内的所有数据
+func (t IotValue) GetLineItems(sensorID int, startTS, stopTS int64) ([]*IotValue, errs.ErrInfo) {
+	var items []*IotValue
+	cols := []string{"id", "etl_timestamp", "value"}
+	err := utils.GetMysqlClient().Cols(cols...).Where("sensor_id=?", sensorID).
+		And("etl_timestamp >=?", startTS).
+		And("etl_timestamp <=?", stopTS).
+		OrderBy("etl_timestamp").
+		Find(&items)
+	if err != nil {
+		glog.Errorf("The the items from %s failed,err:%+v", t.TableName(), err)
+		return nil, errs.ErrDBGet
+	}
+	return items, errs.Succ
+}
