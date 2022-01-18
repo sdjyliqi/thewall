@@ -49,3 +49,9 @@ var DefaultConfig = Config{
 	RedisPassword: "Aa123.",
 	RunPort:       15001,
 }
+
+//127.0.0.1:6379>
+//127.0.0.1:6379> auth biterIam007
+//OK
+//127.0.0.1:6379> config set requirepass a123.
+//OK

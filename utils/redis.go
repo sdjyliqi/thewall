@@ -22,7 +22,7 @@ func InitRedis(addr string, password string) (*redis.Client, error) {
 
 	_, err := redisClient.Ping(context.Background()).Result()
 	if err != nil {
-		glog.Infof("[init] Initialize redis client failed,please check the addr:%+v,err:%+v", addr, err)
+		glog.Infof("[init] Initialize redis client failed,please check the addr:%+v,password:%+v,err:%+v", addr, password, err)
 	}
 	return redisClient, err
 }
