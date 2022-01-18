@@ -11,7 +11,7 @@ var CropTypeDic = map[int]string{}
 var SoilTypeDic = map[int]string{}
 
 func LoadTranslateDic() {
-	t := time.Tick(10 * time.Second)
+	t := time.Tick(30 * time.Second)
 	for {
 		<-t
 		fmt.Println("每隔 1 秒输出一次")
@@ -30,6 +30,5 @@ func LoadTranslateDic() {
 		for _, v := range cropTypeItems {
 			CropTypeDic[v.Id] = v.Name
 		}
-
 	}
 }

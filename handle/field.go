@@ -136,8 +136,14 @@ func FieldDel(c *gin.Context) {
 //FieldGetItems ... 获取验证码
 func FieldGetItems(c *gin.Context) {
 	//定义app土地列表中的土地信息结构体
-	type fieldView struct {
-	}
+	//type fieldView struct {
+	//	Id            int       `json:"id" `
+	//	Name          string    `json:"name"`
+	//	SoilType      string    `json:"soil_type"`
+	//	Status      string    `json:"status"`
+	//	threshold      string    `json:"status"`
+	//}
+	//
 	userID, _ := c.GetQuery("user_id")
 	//判断一下userid是否为空
 	if userID == "" {
