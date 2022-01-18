@@ -7,6 +7,7 @@ import (
 	"github.com/go-xorm/xorm"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"thewall/errs"
 	"thewall/utils"
 )
 
@@ -24,6 +25,12 @@ func Test_IotUcRegister(t *testing.T) {
 	ok, err := UCModel.Register(user)
 	assert.Nil(t, err)
 	t.Log(ok)
+}
+
+func Test_IotUcChkUserExisted(t *testing.T) {
+	item, err := UCModel.ChkUserExisted(1)
+	assert.Equal(t, err, errs.Succ)
+	t.Log(item)
 }
 
 //测试

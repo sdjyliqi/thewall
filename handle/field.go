@@ -1,6 +1,7 @@
 package handle
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"thewall/errs"
@@ -32,6 +33,7 @@ func FieldAdd(c *gin.Context) {
 	}
 	//首先判断userid 是否合法
 	existed, chkErr := model.UCModel.ChkUserExisted(item.UserID)
+	fmt.Println("==============", existed, chkErr)
 	if chkErr != errs.Succ {
 		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
 		return
@@ -87,6 +89,7 @@ func FieldEdit(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"code": errs.ErrUCNoUser.Code, "msg": errs.ErrUCNoUser.MessageEN, "data": nil})
 	}
 	addItem := &model.IotField{
+		Id:         item.Id,
 		Name:       item.Name,
 		NameCn:     item.NameCn,
 		UserId:     item.UserID,

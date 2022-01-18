@@ -44,7 +44,7 @@ func (t *IotUc) Login(email, password string) (bool, errs.ErrInfo) {
 //ChkUserExisted ...查询某用户是否存在
 func (t *IotUc) ChkUserExisted(id int) (bool, errs.ErrInfo) {
 	var item IotUc
-	ok, err := utils.GetMysqlClient().Id(id).Get(&item)
+	ok, err := utils.GetMysqlClient().Where("id=?", id).Get(&item)
 	if err != nil {
 		glog.Errorf("Get item by id %d from table %s failed,err:%+v", id, t.TableName(), err)
 		return false, errs.ErrDBGet

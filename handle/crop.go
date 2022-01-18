@@ -14,6 +14,11 @@ func HelloWord(c *gin.Context) {
 
 //GetCropTypeAllItems ... 获取crop_type全量数据
 func GetCropTypeAllItems(c *gin.Context) {
+	type CropTypeShort struct {
+		Id   int    `json:"id" "`
+		Name string `json:"name" "`
+	}
+	var showItmes []*CropTypeShort
 	//keywords, _ := c.GetQuery("idx")
 	//if keywords == "" {
 	//	c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "bad request"})
@@ -23,7 +28,14 @@ func GetCropTypeAllItems(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "msg": err.Error(), "data": nil})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": items})
+	for _, v := range items {
+		node := &CropTypeShort{
+			Id:   v.Id,
+			Name: v.Name,
+		}
+		showItmes = append(showItmes, node)
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": showItmes})
 	return
 }
 
