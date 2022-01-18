@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"thewall/conf"
+	"thewall/handle"
 	"thewall/router"
 )
 
@@ -16,7 +17,7 @@ func init() {
 	if ymlPath == "" {
 		log.Println("You must input path of the yml ....")
 	}
-
+	handle.LoadTranslateDic()
 }
 
 func main() {

@@ -1,7 +1,6 @@
 package handle
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"thewall/errs"
@@ -33,7 +32,6 @@ func FieldAdd(c *gin.Context) {
 	}
 	//首先判断userid 是否合法
 	existed, chkErr := model.UCModel.ChkUserExisted(item.UserID)
-	fmt.Println("==============", existed, chkErr)
 	if chkErr != errs.Succ {
 		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
 		return
@@ -137,6 +135,9 @@ func FieldDel(c *gin.Context) {
 
 //FieldGetItems ... 获取验证码
 func FieldGetItems(c *gin.Context) {
+	//定义app土地列表中的土地信息结构体
+	type fieldView struct {
+	}
 	userID, _ := c.GetQuery("user_id")
 	//判断一下userid是否为空
 	if userID == "" {
