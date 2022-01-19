@@ -136,14 +136,16 @@ func FieldDel(c *gin.Context) {
 //FieldGetItems ... 获取验证码
 func FieldGetItems(c *gin.Context) {
 	//定义app土地列表中的土地信息结构体
-	//type fieldView struct {
-	//	Id            int       `json:"id" `
-	//	Name          string    `json:"name"`
-	//	SoilType      string    `json:"soil_type"`
-	//	Status      string    `json:"status"`
-	//	threshold      string    `json:"status"`
-	//}
-	//
+	type fieldView struct {
+		Id        int     `json:"id" `
+		Name      string  `json:"name"`
+		SoilType  string  `json:"soil_type"`
+		Status    int     `json:"status"`
+		Longitude float32 `json:"longitude"`
+		Latitude  float32 `json:"latitude"`
+		Threshold string  `json:"threshold"`
+	}
+	var viewItems []*fieldView
 	userID, _ := c.GetQuery("user_id")
 	//判断一下userid是否为空
 	if userID == "" {
@@ -158,6 +160,18 @@ func FieldGetItems(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"code": errEx.Code, "msg": errEx.MessageEN, "data": nil})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": items})
+	for _, v := range items {
+		node := &fieldView{
+			Id:        v.IotField.Id,
+			Name:      v.IotField.Name,
+			SoilType:  ConvertCropTypeName(v.IotField.SoilTypeId),
+			Status:    v.IotField.StateNowId,
+			Longitude: v.IotField.Longitude,
+			Latitude:  v.IotField.Latitude,
+			Threshold: "待计算todo",
+		}
+		viewItems = append(viewItems, node)
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": viewItems})
 	return
 }

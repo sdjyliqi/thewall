@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 	"github.com/golang/glog"
+	"log"
 	"thewall/utils"
 	"time"
 )
@@ -30,7 +31,7 @@ func (t IotCropType) GetAllItems() ([]*IotCropType, error) {
 	var items []*IotCropType
 	err := utils.GetMysqlClient().Find(&items)
 	if err != nil {
-		glog.Errorf("The the items from %s failed,err:%+v", t.TableName(), err)
+		log.Printf("The the items from %s failed,err:%+v", t.TableName(), err)
 		return nil, err
 	}
 	return items, nil

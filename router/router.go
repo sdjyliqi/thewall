@@ -3,9 +3,11 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"thewall/handle"
+	"thewall/middleware"
 )
 
 func InitRouter(r *gin.Engine) {
+	r.Use(middleware.Logger())
 	r.GET("/ping", handle.Ping)                 //测活接口,1
 	r.POST("/uc/login", handle.UCLogin)         //利用邮件和密码登录
 	r.POST("/uc/register", handle.UCRegister)   //用户注册,包括邮件、密码、昵称、密码、code验证码五个维度数据

@@ -1,23 +1,26 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
+	"math/rand"
+	"os"
 	"thewall/conf"
 	"thewall/handle"
 	"thewall/router"
+	"time"
 )
 
 func init() {
-	var ymlPath string
-	flag.StringVar(&ymlPath, "c", "", "configuration file")
-	flag.Parse()
-	if ymlPath == "" {
-		log.Println("You must input path of the yml ....")
+	rand.Seed(time.Now().UnixNano())
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+	logFile, err := os.OpenFile("access.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		log.Panic("打开日志文件异常，请确定用户权限")
 	}
-	handle.LoadTranslateDic()
+	log.SetOutput(logFile)
+	go handle.LoadTranslateDic()
 }
 
 func main() {
