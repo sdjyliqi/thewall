@@ -21,11 +21,12 @@ func InitRouter(r *gin.Engine) {
 	//r.GET("/device/items", handle.GetDeviceAllItems)
 	//r.GET("/device/page", handle.GetDeviceItemsByPage)
 
-	r.POST("/field/add", handle.FieldAdd)        //某用户增加农场
-	r.POST("/field/edit", handle.FieldEdit)      //修改农场信息
-	r.POST("/field/del", handle.FieldDel)        //某用户删除农场信息
-	r.GET("/field/items", handle.FieldGetItems)  //查询某个用户的所属农场
-	r.POST("/field/plant", handle.FieldPlanting) //开始种植
+	r.POST("/field/add", handle.FieldAdd)         //某用户增加农场
+	r.POST("/field/edit", handle.FieldEdit)       //修改农场信息
+	r.POST("/field/del", handle.FieldDel)         //某用户删除农场信息
+	r.GET("/field/items", handle.FieldGetItems)   //查询某个用户的所属农场
+	r.POST("/field/plant", handle.FieldPlanting)  //开始种植
+	r.POST("/field/harvest", handle.FieldHarvest) //开始收获
 
 	r.GET("/sensor/itemsByField", handle.GetSensorItemsByField)     //获取绑定Field的传感器列表
 	r.GET("/sensor/itemsByGateway", handle.GetSensorItemsByGateway) //获取绑定Gateway的传感器列表

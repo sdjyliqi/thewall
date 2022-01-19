@@ -28,9 +28,18 @@ func (t IotPlant) TableName() string {
 
 //Planting  ...开始种植
 func (t IotPlant) Planting(item *IotPlant) (*IotPlant, errs.ErrInfo) {
-	item.WriteDate = time.Now()
-	item.StateId = int(utils.FieldPlanting) //后续需要定义好状态
 	_, err := utils.GetMysqlClient().Insert(item)
+	if err != nil {
+		glog.Errorf("Insert the item %+v to table %s failed,err:%+v", *item, t.TableName(), err)
+		return nil, errs.ErrDBInsert
+	}
+	return item, errs.Succ
+}
+
+//Harvest  ...开始种植
+func (t IotPlant) Harvest(item *IotPlant) (*IotPlant, errs.ErrInfo) {
+	cols := []string{"harvest_date", "state_id", "write_date"}
+	_, err := utils.GetMysqlClient().ID(item.Id).Cols(cols...).Update(item)
 	if err != nil {
 		glog.Errorf("Insert the item %+v to table %s failed,err:%+v", *item, t.TableName(), err)
 		return nil, errs.ErrDBInsert
