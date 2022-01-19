@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+var PlantModel IotPlant
+
 type IotPlant struct {
 	Id           int       `json:"id" xorm:"not null pk autoincr INT(11)"`
 	FieldId      int       `json:"field_id" xorm:"comment('field_id') INT(11)"`
