@@ -22,6 +22,17 @@ type AddField struct {
 	Sensors    []int   `json:"sensors"`       //增加地
 }
 
+type PlantingField struct {
+	Id         int     `json:"id"`            //新增的时候，该字段为空
+	SoilTypeId int     `json:"soil_type_id" ` //土地类型
+	Country    string  `json:"country" `      //国家
+	Longitude  float32 `json:"longitude" `    //经度
+	Latitude   float32 `json:"latitude" `     //维度
+	Area       float32 `json:"area" `         //面积
+	UserID     int     `json:"user_id"`       //增加地
+	Sensors    []int   `json:"sensors"`       //增加地
+}
+
 //FieldAdd ... 增加农场
 func FieldAdd(c *gin.Context) {
 	item := AddField{}
@@ -49,7 +60,7 @@ func FieldAdd(c *gin.Context) {
 		Area:          item.Area,
 		SoilTypeId:    item.SoilTypeId,
 		CropTypeNowId: 0,
-		StateNowId:    0,
+		StateNowId:    int(utils.FieldIdle),
 		CreateUid:     item.UserID,
 		CreateDate:    time.Now(),
 		WriteDate:     time.Now(),
