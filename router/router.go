@@ -27,6 +27,8 @@ func InitRouter(r *gin.Engine) {
 	r.GET("/field/items", handle.FieldGetItems)   //查询某个用户的所属农场
 	r.POST("/field/plant", handle.FieldPlanting)  //开始种植
 	r.POST("/field/harvest", handle.FieldHarvest) //开始收获
+	r.POST("/field/weigh", handle.FieldWeigh)     //开始称重
+	//tood 称重
 
 	r.GET("/sensor/itemsByField", handle.GetSensorItemsByField)     //获取绑定Field的传感器列表
 	r.GET("/sensor/itemsByGateway", handle.GetSensorItemsByGateway) //获取绑定Gateway的传感器列表

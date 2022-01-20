@@ -14,7 +14,7 @@ type IotPlant struct {
 	FieldId      int       `json:"field_id" xorm:"comment('field_id') INT(11)"`
 	CropTypeId   int       `json:"crop_type_id" xorm:"comment('crop_type_id') INT(11)"`
 	PlantingDate time.Time `json:"planting_date" xorm:"comment('Start Date') DATE"`
-	WeightDate   time.Time `json:"weight_date" xorm:"DATE"`
+	WeighDate    time.Time `json:"weigh_date" xorm:"DATE"`
 	HarvestDate  time.Time `json:"harvest_date" xorm:"comment('End Date') DATE"`
 	Amount       float32   `json:"amount" xorm:"comment('Amount') FLOAT(11,2)"`
 	StateId      int       `json:"state_id" xorm:"comment('种植周期阶段') INT(11)"`
@@ -39,6 +39,17 @@ func (t IotPlant) Planting(item *IotPlant) (*IotPlant, errs.ErrInfo) {
 //Harvest  ...开始种植
 func (t IotPlant) Harvest(item *IotPlant) (*IotPlant, errs.ErrInfo) {
 	cols := []string{"harvest_date", "state_id", "write_date"}
+	_, err := utils.GetMysqlClient().ID(item.Id).Cols(cols...).Update(item)
+	if err != nil {
+		glog.Errorf("Insert the item %+v to table %s failed,err:%+v", *item, t.TableName(), err)
+		return nil, errs.ErrDBInsert
+	}
+	return item, errs.Succ
+}
+
+//Weigh  ...开始称重
+func (t IotPlant) Weigh(item *IotPlant) (*IotPlant, errs.ErrInfo) {
+	cols := []string{"weigh_date", "state_id", "write_date"}
 	_, err := utils.GetMysqlClient().ID(item.Id).Cols(cols...).Update(item)
 	if err != nil {
 		glog.Errorf("Insert the item %+v to table %s failed,err:%+v", *item, t.TableName(), err)
