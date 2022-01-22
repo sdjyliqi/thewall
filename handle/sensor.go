@@ -242,8 +242,6 @@ func GatherData(c *gin.Context) {
 	value := model.IotValue{
 		EtlTimestamp: utils.Convert2Int(item.EtlTimeStamp),
 		FieldId:      sensorItem.FieldId,
-		SensorId:     item.SensorID,
-		SensorTypeId: sensorItem.SensorTypeId,
 		Depth:        sensorItem.Depth,
 		Value:        item.Value,
 		CreateUid:    0,
