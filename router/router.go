@@ -31,6 +31,8 @@ func InitRouter(r *gin.Engine) {
 	//todo 查找该土地的所有种植的历史记录
 	//tood 称重
 
+	r.GET("/sensor/itemsByPage", handle.GetSensorItemsByPage)       //后台分页获取Sensor列表
+	r.POST("/sensor/add", handle.AddSensor)                         //后台添加Sensor
 	r.GET("/sensor/itemsByField", handle.GetSensorItemsByField)     //获取绑定Field的传感器列表
 	r.GET("/sensor/itemsByGateway", handle.GetSensorItemsByGateway) //获取绑定Gateway的传感器列表
 	r.GET("/sensor/itemsByUser", handle.GetSensorItemsByUser)       //获取用户绑定的Sensor列表

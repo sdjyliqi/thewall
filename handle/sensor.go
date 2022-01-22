@@ -11,14 +11,15 @@ import (
 )
 
 type SensorDto struct {
-	Id           int    `json:"id"`
-	Name         string `json:"name"`
-	Code         string `json:"code"`
-	FieldId      int    `json:"field_id"`
-	UserId       int    `json:"user_id"`
-	GatewayId    int    `json:"gateway_id"`
-	SensorTypeId int    `json:"sensor_type_id"`
-	Depth        int    `json:"depth"`
+	Id        int     `json:"id"`
+	Name      string  `json:"name"`
+	Code      string  `json:"code"`
+	FieldId   int     `json:"field_id"`
+	UserId    int     `json:"user_id"`
+	GatewayId int     `json:"gateway_id"`
+	Longitude float32 `json:"longitude"`
+	Latitude  float32 `json:"latitude"`
+	Depths    []int   `json:"depths"`
 }
 
 type SensorGather struct {
@@ -209,7 +210,6 @@ func EditSensorByUser(c *gin.Context) {
 	item := model.IotSensor{
 		Id:     itemDto.Id,
 		UserId: itemDto.UserId,
-		Depth:  itemDto.Depth,
 	}
 	ok, err := model.SensorModel.UpdateItemByUser(&item)
 	if err != errs.Succ {
@@ -242,7 +242,6 @@ func GatherData(c *gin.Context) {
 	value := model.IotValue{
 		EtlTimestamp: utils.Convert2Int(item.EtlTimeStamp),
 		FieldId:      sensorItem.FieldId,
-		Depth:        sensorItem.Depth,
 		Value:        item.Value,
 		CreateUid:    0,
 		CreateDate:   time.Now(),
