@@ -8,7 +8,7 @@ import (
 )
 
 var CropTypeDic = map[int]string{}
-var SensorTypeDic = map[int]string{}
+var ProbeTypeDic = map[int]string{}
 var SoilTypeDic = map[int]string{}
 var ReferenceDic = map[string]*model.IotReference{}
 
@@ -24,12 +24,12 @@ func GetCropTypeByID(id int) string {
 	return v
 }
 
-//GetCropTypeByID...
-func GetSensorTypeByID(id int) string {
+//GetProbeTypeByID...
+func GetProbeTypeByID(id int) string {
 	if id <= 0 {
 		return "unknown"
 	}
-	v, ok := SensorTypeDic[id]
+	v, ok := ProbeTypeDic[id]
 	if !ok {
 		glog.Errorf("Do not find the Sensor type %+v,please check it!", id)
 	}
@@ -56,7 +56,7 @@ func createIdxForReference(soilTypeID, cropTypeID int) string {
 func GetReference(soilTypeID, cropTypeID int) *model.IotReference {
 	v, ok := ReferenceDic[createIdxForReference(soilTypeID, cropTypeID)]
 	if !ok {
-		glog.Errorf("Do not find the item for soil_type_id %d with crop_type_id,please check it!", soilTypeID, cropTypeID)
+		glog.Errorf("Do not find the item for soil_type_id %d with crop_type_id %d ,please check it!", soilTypeID, cropTypeID)
 		return nil
 	}
 	return v
@@ -67,16 +67,16 @@ func GetReferenceNotice(soilTypeID, cropTypeID int) string {
 	if item == nil {
 		return "unknown"
 	}
-	return fmt.Sprintf("%f/%----%f/%", item.HumidityMin*100, item.HumidityMax*100)
+	return fmt.Sprintf("%.2f %%----%.2f %%", item.HumidityMin*100, item.HumidityMax*100)
 }
 func LoadTranslateDic() {
-	t := time.Tick(30 * time.Second)
+	t := time.Tick(3 * time.Second)
 	for {
 		<-t
 		//设置传感器类型的映射表
-		sensorTypeItems, _ := model.SensorTypeModel.GetAllItems()
-		for _, v := range sensorTypeItems {
-			SensorTypeDic[v.Id] = v.Name
+		probeTypeItems, _ := model.ProbeTypeModel.GetAllItems()
+		for _, v := range probeTypeItems {
+			ProbeTypeDic[v.Id] = v.Name
 		}
 		//设置土地类型的映射表
 		soilTypeItems, _ := model.IotSoilTypeModel.GetAllItems()
@@ -93,6 +93,6 @@ func LoadTranslateDic() {
 		for _, v := range referenceItems {
 			ReferenceDic[createIdxForReference(v.SoilTypeId, v.CropTypeId)] = v
 		}
-
+		t = time.Tick(30 * time.Second)
 	}
 }
