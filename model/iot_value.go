@@ -12,10 +12,9 @@ var IotValueModel IotValue
 
 type IotValue struct {
 	Id           int       `json:"id" xorm:"not null pk autoincr INT(11)"`
+	Code         string    `json:"code" xorm:"VARCHAR(32)"`
 	EtlTimestamp int       `json:"etl_timestamp" xorm:"not null comment('Etl Time') INT(11)"`
 	FieldId      int       `json:"field_id" xorm:"comment('field_id') INT(11)"`
-	SensorId     int       `json:"sensor_id" xorm:"comment('Sensor') INT(11)"`
-	SensorTypeId int       `json:"sensor_type_id" xorm:"comment('Sensor Type') INT(11)"`
 	Depth        int       `json:"depth" xorm:"comment('Depth') INT(11)"`
 	Value        int       `json:"value" xorm:"comment('Value') INT(11)"`
 	CreateUid    int       `json:"create_uid" xorm:"comment('Created by') INT(11)"`

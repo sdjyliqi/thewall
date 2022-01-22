@@ -222,6 +222,7 @@ func EditSensorByUser(c *gin.Context) {
 }
 
 //GatherData ... 添加一个传感器采集的数据
+//todo  probe的类型也在此接收上传，坐标
 func GatherData(c *gin.Context) {
 	item := SensorGather{}
 	bindErr := c.BindJSON(&item)
