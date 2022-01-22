@@ -97,7 +97,7 @@ func FieldHarvest(c *gin.Context) {
 		StateId:     int(utils.FieldHarvest),
 		WriteDate:   time.Now(),
 	}
-	_, errEX = model.PlantModel.Planting(addItem)
+	_, errEX = model.PlantModel.Harvest(addItem)
 	if errEX != errs.Succ {
 		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
 		return
