@@ -1,6 +1,7 @@
 package handle
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"thewall/errs"
@@ -175,5 +176,42 @@ func FieldGetItems(c *gin.Context) {
 		viewItems = append(viewItems, node)
 	}
 	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": viewItems})
+	return
+}
+
+//FieldProbeLines ... 获取该田地的所有探针列表，默认是当天的数据
+func FieldProbeLines(c *gin.Context) {
+	type probeLine struct {
+		Name         string `json:"name"`
+		SensorId     string `json:"sensor_id"`
+		Code         string `json:"code"`
+		ProbeType    string `json:"probe_type"`
+		Depth        int    `json:"depth"`
+		LastModified string `json:"last_modified"`
+		Kline        []int  `json:"kline"`
+	}
+	type FieldLines struct {
+		Id         int         `json:"id" `
+		Name       string      `json:"name"`
+		SoilType   string      `json:"soil_type"`
+		CropType   string      `json:"crop_type"`
+		Longitude  float32     `json:"longitude"`
+		Latitude   float32     `json:"latitude"`
+		ProbeLines []probeLine `json:"probe_lines"`
+	}
+	strUID, _ := c.GetQuery("user_id")
+	strFID, _ := c.GetQuery("field_id")
+	//判断一下userid是否为空
+	if strUID == "" || strFID == "" {
+		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	//获取用户id
+	uid := utils.Convert2Int(strUID)
+	fid := utils.Convert2Int(strFID)
+	//
+	fmt.Println(uid, fid)
+	//todo  实现
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": nil})
 	return
 }
