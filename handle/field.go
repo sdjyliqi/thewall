@@ -164,11 +164,11 @@ func FieldGetItems(c *gin.Context) {
 		node := &fieldView{
 			Id:        v.IotField.Id,
 			Name:      v.IotField.Name,
-			SoilType:  ConvertCropTypeName(v.IotField.SoilTypeId),
+			SoilType:  GetCropTypeByID(v.IotField.SoilTypeId),
 			Status:    v.IotField.StateNowId,
 			Longitude: v.IotField.Longitude,
 			Latitude:  v.IotField.Latitude,
-			Threshold: "待计算todo",
+			Threshold: GetReferenceNotice(v.SoilTypeId, v.CropTypeNowId),
 		}
 		viewItems = append(viewItems, node)
 	}

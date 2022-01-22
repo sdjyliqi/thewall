@@ -119,3 +119,35 @@ func FieldWeigh(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": nil})
 	return
 }
+
+//FieldEnded ... 终止
+func FieldEnded(c *gin.Context) {
+	item := PlantingField{}
+	err := c.BindJSON(&item)
+	if err != nil || item.id <= 0 {
+		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	//首先判断userid 是否合法
+	existed, chkErr := model.UCModel.ChkUserExisted(item.UserID)
+	if chkErr != errs.Succ {
+		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
+		return
+	}
+	//如果某用户不存在，直接异常返回即可
+	if !existed {
+		c.JSON(http.StatusOK, gin.H{"code": errs.ErrUCNoUser.Code, "msg": errs.ErrUCNoUser.MessageEN, "data": nil})
+	}
+	//继续判断该土地是否处于结束种植状态或者没有找到记录
+	addItem := &model.IotPlant{
+		StateId:   int(utils.FieldIdle),
+		WriteDate: time.Now(),
+	}
+	_, errEX := model.PlantModel.Ended(addItem)
+	if errEX != errs.Succ {
+		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": nil})
+	return
+}

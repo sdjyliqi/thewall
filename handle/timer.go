@@ -62,6 +62,13 @@ func GetReference(soilTypeID, cropTypeID int) *model.IotReference {
 	return v
 }
 
+func GetReferenceNotice(soilTypeID, cropTypeID int) string {
+	item := GetReference(soilTypeID, cropTypeID)
+	if item == nil {
+		return "unknown"
+	}
+	return fmt.Sprintf("%f/%--%f/%", item.HumidityMin*100, item.HumidityMax*100)
+}
 func LoadTranslateDic() {
 	t := time.Tick(30 * time.Second)
 	for {
