@@ -1,7 +1,9 @@
 package model
 
 import (
+	"fmt"
 	"github.com/golang/glog"
+	"thewall/errs"
 	"thewall/utils"
 	"time"
 )
@@ -17,6 +19,11 @@ type IotProbe struct {
 	LastModified time.Time `json:"last_modified" xorm:"comment('最后上传数据的时间') DATETIME"`
 }
 
+type ProbeExtend struct {
+	IotSensor `xorm:"extends"`
+	IotProbe  `xorm:"extends"`
+}
+
 func (t IotProbe) TableName() string {
 	return "iot_probe"
 }
@@ -30,4 +37,20 @@ func (t IotProbe) GetAllItems() ([]*IotProbe, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+//GetProbesByFieldID  ...根据土地ID获取所有的传感器上探针的列表
+func (t IotProbe) GetProbesByFieldID(field int) ([]*ProbeExtend, errs.ErrInfo) {
+	var items []*ProbeExtend
+	jsonCondition := fmt.Sprintf("%s.%s=%s.%s", t.TableName(), "sensor_id", SensorModel.TableName(), "name")
+	whereCondition := fmt.Sprintf("%s.%s=%d", SensorModel.TableName(), "field_id", field)
+	err := utils.GetMysqlClient().Table(t.TableName()).
+		Join("LEFT", SensorModel.TableName(), jsonCondition).
+		Where(whereCondition).
+		Find(&items)
+	if err != nil {
+		glog.Errorf("The the items by field_id %d from %s failed,err:%+v", field, t.TableName(), err)
+		return nil, errs.ErrDBGet
+	}
+	return items, errs.Succ
 }

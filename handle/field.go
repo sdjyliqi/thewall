@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strings"
 	"thewall/errs"
 	"thewall/model"
 	"thewall/utils"
@@ -191,14 +192,18 @@ func FieldProbeLines(c *gin.Context) {
 		Kline        []int  `json:"kline"`
 	}
 	type FieldLines struct {
-		Id         int         `json:"id" `
-		Name       string      `json:"name"`
-		SoilType   string      `json:"soil_type"`
-		CropType   string      `json:"crop_type"`
-		Longitude  float32     `json:"longitude"`
-		Latitude   float32     `json:"latitude"`
-		ProbeLines []probeLine `json:"probe_lines"`
+		code            string       `json:"code" `
+		Name            string       `json:"name"`
+		ProbeType       string       `json:"probe_type"`
+		LastReceiveData string       `json:"last_receive_data"`
+		Depth           int          `json:"depth"`
+		Longitude       float32      `json:"longitude"`
+		Latitude        float32      `json:"latitude"`
+		ProbeLines      []*probeLine `json:"probe_lines"`
 	}
+	var FieldLinesView FieldLines
+	var klines []*probeLine
+
 	strUID, _ := c.GetQuery("user_id")
 	strFID, _ := c.GetQuery("field_id")
 	//判断一下userid是否为空
@@ -212,6 +217,29 @@ func FieldProbeLines(c *gin.Context) {
 	//
 	fmt.Println(uid, fid)
 	//todo  实现
-	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": nil})
+	probeItems, errEX := model.ProbeModel.GetProbesByFieldID(fid)
+	if errEX != errs.Succ {
+		c.JSON(http.StatusOK, gin.H{"code": errEX.Code, "msg": errEX.MessageEN, "data": nil})
+		return
+	}
+
+	var probeCodes []string
+	for _, v := range probeItems {
+		klineNode := &probeLine{
+			Name:         strings.Replace(v.IotProbe.Code, "_", "/", 0),
+			SensorId:     v.IotSensor.Name,
+			Code:         v.IotProbe.Code,
+			ProbeType:    GetProbeTypeByID(v.IotProbe.ProbeTypeId),
+			Depth:        v.IotProbe.Depth,
+			LastModified: v.IotProbe.LastModified.Format(utils.DayCommonFormat),
+			Kline:        nil,
+		}
+		klines = append(klines, klineNode)
+		probeCodes = append(probeCodes, v.IotProbe.Code)
+	}
+
+	FieldLinesView.ProbeLines = klines
+
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": FieldLinesView})
 	return
 }
