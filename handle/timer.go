@@ -67,7 +67,7 @@ func GetReferenceNotice(soilTypeID, cropTypeID int) string {
 	if item == nil {
 		return "unknown"
 	}
-	return fmt.Sprintf("%f/%--%f/%", item.HumidityMin*100, item.HumidityMax*100)
+	return fmt.Sprintf("%f/%----%f/%", item.HumidityMin*100, item.HumidityMax*100)
 }
 func LoadTranslateDic() {
 	t := time.Tick(30 * time.Second)

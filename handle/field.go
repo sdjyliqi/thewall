@@ -140,6 +140,7 @@ func FieldGetItems(c *gin.Context) {
 		Id        int     `json:"id" `
 		Name      string  `json:"name"`
 		SoilType  string  `json:"soil_type"`
+		CropType  string  `json:"crop_type"`
 		Status    string  `json:"status"`
 		Longitude float32 `json:"longitude"`
 		Latitude  float32 `json:"latitude"`
@@ -164,7 +165,8 @@ func FieldGetItems(c *gin.Context) {
 		node := &fieldView{
 			Id:        v.IotField.Id,
 			Name:      v.IotField.Name,
-			SoilType:  GetCropTypeByID(v.IotField.SoilTypeId),
+			SoilType:  GetSoilTypeByID(v.IotField.SoilTypeId),
+			CropType:  GetCropTypeByID(v.CropTypeNowId),
 			Status:    "ok", //todo 后续需要计算得出改制
 			Longitude: v.IotField.Longitude,
 			Latitude:  v.IotField.Latitude,
