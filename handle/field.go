@@ -140,7 +140,7 @@ func FieldGetItems(c *gin.Context) {
 		Id        int     `json:"id" `
 		Name      string  `json:"name"`
 		SoilType  string  `json:"soil_type"`
-		Status    int     `json:"status"`
+		Status    string  `json:"status"`
 		Longitude float32 `json:"longitude"`
 		Latitude  float32 `json:"latitude"`
 		Threshold string  `json:"threshold"`
@@ -165,7 +165,7 @@ func FieldGetItems(c *gin.Context) {
 			Id:        v.IotField.Id,
 			Name:      v.IotField.Name,
 			SoilType:  GetCropTypeByID(v.IotField.SoilTypeId),
-			Status:    v.IotField.StateNowId,
+			Status:    "ok", //todo 后续需要计算得出改制
 			Longitude: v.IotField.Longitude,
 			Latitude:  v.IotField.Latitude,
 			Threshold: GetReferenceNotice(v.SoilTypeId, v.CropTypeNowId),
