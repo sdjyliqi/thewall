@@ -1,8 +1,12 @@
 package model
 
 import (
+	"github.com/golang/glog"
+	"thewall/utils"
 	"time"
 )
+
+var ProbeTypeModel IotProbeType
 
 type IotProbeType struct {
 	Id        int       `json:"id" xorm:"not null pk INT(11)"`
@@ -14,4 +18,15 @@ type IotProbeType struct {
 
 func (t IotProbeType) TableName() string {
 	return "iot_probe_type"
+}
+
+//GetAllItems  ...获取全量数据
+func (t IotProbeType) GetAllItems() ([]*IotProbeType, error) {
+	var items []*IotProbeType
+	err := utils.GetMysqlClient().Find(&items)
+	if err != nil {
+		glog.Errorf("The the items from %s failed,err:%+v", t.TableName(), err)
+		return nil, err
+	}
+	return items, nil
 }

@@ -68,6 +68,16 @@ func (t IotField) EditField(item *IotField) errs.ErrInfo {
 	return errs.Succ
 }
 
+//EditFieldByID ... 用户增加土地
+func (t IotField) EditFieldByID(item *IotField, cols []string) errs.ErrInfo {
+	_, err := utils.GetMysqlClient().ID(item.Id).Cols(cols...).Update(item)
+	if err != nil {
+		glog.Errorf("Update the item %+v to table %s failed,err:%+v", *item, t.TableName(), err)
+		return errs.ErrDBInsert
+	}
+	return errs.Succ
+}
+
 //DelField ... 删除土地信息
 func (t IotField) DelField(fieldID, userID int) errs.ErrInfo {
 	condition := fmt.Sprintf("user_id=%d", userID)

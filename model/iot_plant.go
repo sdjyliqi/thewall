@@ -33,6 +33,16 @@ func (t IotPlant) Planting(item *IotPlant) (*IotPlant, errs.ErrInfo) {
 		glog.Errorf("Insert the item %+v to table %s failed,err:%+v", *item, t.TableName(), err)
 		return nil, errs.ErrDBInsert
 	}
+	fieldItem := &IotField{
+		Id:            item.FieldId,
+		CropTypeNowId: item.CropTypeId,
+		WriteDate:     time.Now(),
+	}
+	cols := []string{"crop_type_now_id", "write_date"}
+	errEX := FieldModel.EditFieldByID(fieldItem, cols)
+	if errEX != errs.Succ {
+		return nil, errEX
+	}
 	return item, errs.Succ
 }
 
@@ -50,6 +60,17 @@ func (t IotPlant) Harvest(item *IotPlant) (*IotPlant, errs.ErrInfo) {
 //Weigh  ...开始称重
 func (t IotPlant) Weigh(item *IotPlant) (*IotPlant, errs.ErrInfo) {
 	cols := []string{"weigh_date", "state_id", "write_date"}
+	_, err := utils.GetMysqlClient().ID(item.Id).Cols(cols...).Update(item)
+	if err != nil {
+		glog.Errorf("Insert the item %+v to table %s failed,err:%+v", *item, t.TableName(), err)
+		return nil, errs.ErrDBInsert
+	}
+	return item, errs.Succ
+}
+
+//Ended  ...终止
+func (t IotPlant) Ended(item *IotPlant) (*IotPlant, errs.ErrInfo) {
+	cols := []string{"state_id", "write_date"}
 	_, err := utils.GetMysqlClient().ID(item.Id).Cols(cols...).Update(item)
 	if err != nil {
 		glog.Errorf("Insert the item %+v to table %s failed,err:%+v", *item, t.TableName(), err)
