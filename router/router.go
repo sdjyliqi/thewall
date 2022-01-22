@@ -28,6 +28,7 @@ func InitRouter(r *gin.Engine) {
 	r.POST("/field/plant", handle.FieldPlanting)  //开始种植
 	r.POST("/field/harvest", handle.FieldHarvest) //开始收获
 	r.POST("/field/weigh", handle.FieldWeigh)     //开始称重
+	//todo 查找该土地的所有种植的历史记录
 	//tood 称重
 
 	r.GET("/sensor/itemsByField", handle.GetSensorItemsByField)     //获取绑定Field的传感器列表
@@ -38,7 +39,12 @@ func InitRouter(r *gin.Engine) {
 	r.POST("/sensor/unbindByUser", handle.UnbindSensorByUser)       //APP用户解绑Sensor
 	r.POST("/sensor/editByUser", handle.EditSensorByUser)           //APP用户修改Sensor信息
 	r.POST("/sensor/gather", handle.GatherData)                     //收集一次上报数据
-	r.GET("/sensor/line", handle.GetLineItems)                      //查询某个区间的数据
+	r.GET("/sensor/line", handle.GetLineItems)
+	//todo r.GET("/sensor/line", handle.GetLineItems) 数据导出生产csv
+	//todo yanghao   add sensor 方法
+	//雀巢提供api，本服务把数据给数据送过去。
+
+	//查询某个区间的数据
 
 	r.GET("/gateway/itemsByPage", handle.GetGatewayItemsByPage) //后台分页获取Gateway列表
 	r.GET("/gateway/item", handle.GetGatewayItem)               //后台获取Gateway信息

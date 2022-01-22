@@ -20,6 +20,9 @@ func ConvertCropTypeName(id int) string {
 	}
 	return v
 }
+
+//todo  其他类型  转换 liqi
+
 func LoadTranslateDic() {
 	t := time.Tick(30 * time.Second)
 	for {

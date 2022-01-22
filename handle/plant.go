@@ -21,7 +21,7 @@ type PlantingField struct {
 func FieldPlanting(c *gin.Context) {
 	item := PlantingField{}
 	err := c.BindJSON(&item)
-	if err != nil || item.CropTypeId <= 0 {
+	if err != nil || item.CropTypeId <= 0 || item.FieldID <= 0 {
 		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
