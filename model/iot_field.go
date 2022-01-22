@@ -41,6 +41,17 @@ func (t IotField) TableName() string {
 	return "iot_field"
 }
 
+//GetItemByID ... 获取土地信息
+func (t IotField) GetItemByID(fieldID int) (*IotField, errs.ErrInfo) {
+	var item *IotField
+	_, err := utils.GetMysqlClient().ID(fieldID).Get(item)
+	if err != nil {
+		glog.Errorf("Get the item by id %d from table %s failed,err:%+v", fieldID, t.TableName(), err)
+		return nil, errs.ErrDBGet
+	}
+	return item, errs.Succ
+}
+
 //AddFieldByUser ... 用户增加土地
 func (t IotField) AddFieldByUser(item *IotField) (*IotField, errs.ErrInfo) {
 	//Todo，后续需要去重，条件需要沟通

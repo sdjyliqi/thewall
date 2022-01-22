@@ -35,6 +35,16 @@ func FieldPlanting(c *gin.Context) {
 	if !existed {
 		c.JSON(http.StatusOK, gin.H{"code": errs.ErrUCNoUser.Code, "msg": errs.ErrUCNoUser.MessageEN, "data": nil})
 	}
+	fieldInfo, errEX := model.FieldModel.GetItemByID(item.FieldID)
+	if errEX != errs.Succ {
+		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
+		return
+	}
+	//如果根据id查询不到土地信息，或者土地的状态不是空置状态，直接返回异常。
+	if fieldInfo == nil || fieldInfo.StateNowId != int(utils.FieldIdle) {
+		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
 	//继续判断该土地是否处于结束种植状态或者没有找到记录
 	addItem := &model.IotPlant{
 		FieldId:      item.FieldID,
@@ -71,13 +81,23 @@ func FieldHarvest(c *gin.Context) {
 	if !existed {
 		c.JSON(http.StatusOK, gin.H{"code": errs.ErrUCNoUser.Code, "msg": errs.ErrUCNoUser.MessageEN, "data": nil})
 	}
+	//如果根据id查询不到土地信息，或者土地的状态不是空置状态，直接返回异常。
+	fieldInfo, errEX := model.FieldModel.GetItemByID(item.FieldID)
+	if errEX != errs.Succ {
+		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
+		return
+	}
+	if fieldInfo == nil {
+		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
 	//继续判断该土地是否处于结束种植状态或者没有找到记录
 	addItem := &model.IotPlant{
 		HarvestDate: time.Now(),
 		StateId:     int(utils.FieldHarvest),
 		WriteDate:   time.Now(),
 	}
-	_, errEX := model.PlantModel.Planting(addItem)
+	_, errEX = model.PlantModel.Planting(addItem)
 	if errEX != errs.Succ {
 		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
 		return
@@ -107,7 +127,7 @@ func FieldWeigh(c *gin.Context) {
 	//继续判断该土地是否处于结束种植状态或者没有找到记录
 	addItem := &model.IotPlant{
 		HarvestDate: time.Now(),
-		StateId:     int(utils.FieldWeight),
+		StateId:     int(utils.NoPlantsCropType),
 		Amount:      item.Amount,
 		WriteDate:   time.Now(),
 	}
@@ -138,12 +158,23 @@ func FieldEnded(c *gin.Context) {
 	if !existed {
 		c.JSON(http.StatusOK, gin.H{"code": errs.ErrUCNoUser.Code, "msg": errs.ErrUCNoUser.MessageEN, "data": nil})
 	}
+	//如果根据id查询不到土地信息，或者土地的状态不是空置状态，直接返回异常。
+	fieldInfo, errEX := model.FieldModel.GetItemByID(item.FieldID)
+	if errEX != errs.Succ {
+		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
+		return
+	}
+	if fieldInfo == nil {
+		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+
 	//继续判断该土地是否处于结束种植状态或者没有找到记录
 	addItem := &model.IotPlant{
 		StateId:   int(utils.FieldIdle),
 		WriteDate: time.Now(),
 	}
-	_, errEX := model.PlantModel.Ended(addItem)
+	_, errEX = model.PlantModel.Ended(addItem)
 	if errEX != errs.Succ {
 		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
 		return
