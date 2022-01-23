@@ -15,11 +15,11 @@ type IotField struct {
 	Id            int       `json:"id" xorm:"not null pk autoincr INT(11)"`
 	Name          string    `json:"name" xorm:"comment('Name') VARCHAR(64)"`
 	NameCn        string    `json:"name_cn" xorm:"comment('中文名') VARCHAR(64)"`
+	Longitude     float32   `json:"longitude" xorm:"FLOAT(11,5)"`
+	Latitude      float32   `json:"latitude" xorm:"FLOAT(11,5)"`
+	Area          float32   `json:"area" xorm:"FLOAT"`
 	UserId        int       `json:"user_id" xorm:"comment('User') index INT(11)"`
 	AddressId     int       `json:"address_id" xorm:"comment('Address') INT(11)"`
-	Longitude     float32   `json:"longitude" xorm:"FLOAT"`
-	Latitude      float32   `json:"latitude" xorm:"FLOAT"`
-	Area          float32   `json:"area" xorm:"FLOAT"`
 	SoilTypeId    int       `json:"soil_type_id" xorm:"comment('soil_type_id') INT(11)"`
 	CropTypeNowId int       `json:"crop_type_now_id" xorm:"comment('crop_type_now_id') INT(11)"`
 	StateNowId    int       `json:"state_now_id" xorm:"comment('state_now_id') INT(11)"`
@@ -43,13 +43,13 @@ func (t IotField) TableName() string {
 
 //GetItemByID ... 获取土地信息
 func (t IotField) GetItemByID(fieldID int) (*IotField, errs.ErrInfo) {
-	var item *IotField
-	_, err := utils.GetMysqlClient().ID(fieldID).Get(item)
+	var item IotField
+	_, err := utils.GetMysqlClient().ID(fieldID).Get(&item)
 	if err != nil {
 		glog.Errorf("Get the item by id %d from table %s failed,err:%+v", fieldID, t.TableName(), err)
 		return nil, errs.ErrDBGet
 	}
-	return item, errs.Succ
+	return &item, errs.Succ
 }
 
 //AddFieldByUser ... 用户增加土地

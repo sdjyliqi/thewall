@@ -12,6 +12,11 @@ func Test_IotCropGetItemsByUser(t *testing.T) {
 	}
 }
 
+func Test_IotFieldGetItemByID(t *testing.T) {
+	item, _ := FieldModel.GetItemByID(1)
+	t.Log(item)
+}
+
 func Test_IotCropAddFieldByUser(t *testing.T) {
 	node := &IotField{
 		Name:          "test",

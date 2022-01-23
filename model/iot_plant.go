@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"github.com/golang/glog"
 	"thewall/errs"
 	"thewall/utils"
@@ -48,11 +49,22 @@ func (t IotPlant) Planting(item *IotPlant) (*IotPlant, errs.ErrInfo) {
 
 //Harvest  ...开始种植
 func (t IotPlant) Harvest(item *IotPlant) (*IotPlant, errs.ErrInfo) {
-	cols := []string{"harvest_date", "state_id", "write_date"}
-	_, err := utils.GetMysqlClient().
+	fieldItem := &IotField{
+		Id:         item.FieldId,
+		StateNowId: int(utils.FieldHarvest),
+		WriteDate:  time.Now(),
+	}
+	cols := []string{"write_date", "state_now_id"}
+	errEX := FieldModel.EditFieldByID(fieldItem, cols)
+	if errEX != errs.Succ {
+		return nil, errEX
+	}
+	cols = []string{"harvest_date", "state_id", "write_date"}
+	cnt, err := utils.GetMysqlClient().
 		Where("field_id=?", item.FieldId).
-		And("state_id=?", int(utils.FieldPlanting)).
+		And("state_id!=?", int(utils.FieldFinish)).
 		Cols(cols...).Update(item)
+	fmt.Println("=========affect count:", cnt)
 	if err != nil {
 		glog.Errorf("Insert the item %+v to table %s failed,err:%+v", *item, t.TableName(), err)
 		return nil, errs.ErrDBInsert
@@ -62,38 +74,60 @@ func (t IotPlant) Harvest(item *IotPlant) (*IotPlant, errs.ErrInfo) {
 
 //Weigh  ...开始称重
 func (t IotPlant) Weigh(item *IotPlant) (*IotPlant, errs.ErrInfo) {
-	cols := []string{"weigh_date", "state_id", "write_date"}
+	fieldItem := &IotField{
+		Id:         item.FieldId,
+		StateNowId: int(utils.FieldWeight),
+		WriteDate:  time.Now(),
+	}
+	cols := []string{"write_date", "state_now_id"}
+	errEX := FieldModel.EditFieldByID(fieldItem, cols)
+	if errEX != errs.Succ {
+		return nil, errEX
+	}
+	cols = []string{"amount", "weigh_date", "state_id", "write_date"}
 	_, err := utils.GetMysqlClient().
 		Where("field_id=?", item.FieldId).
-		And("state_id=?", int(utils.FieldHarvest)).
+		And("state_id!=?", int(utils.FieldFinish)).
 		Cols(cols...).Update(item)
 	if err != nil {
-		glog.Errorf("Insert the item %+v to table %s failed,err:%+v", *item, t.TableName(), err)
-		return nil, errs.ErrDBInsert
+		glog.Errorf("Update the item %+v from table %s failed,err:%+v", *item, t.TableName(), err)
+		return nil, errs.ErrDBUpdate
 	}
 	return item, errs.Succ
 }
 
 //Ended  ...终止
 func (t IotPlant) Ended(item *IotPlant) (*IotPlant, errs.ErrInfo) {
-	cols := []string{"crop_type_now_id", "write_date"}
+	//更新土地的当前状态
 	fieldItem := &IotField{
-		Id:            item.FieldId,
-		CropTypeNowId: utils.NoPlantsCropType,
-		WriteDate:     time.Now(),
+		Id:         item.FieldId,
+		StateNowId: int(utils.NoPlantsCropType),
+		WriteDate:  time.Now(),
 	}
+	cols := []string{"write_date", "state_now_id"}
 	errEX := FieldModel.EditFieldByID(fieldItem, cols)
+	if errEX != errs.Succ {
+		return nil, errEX
+	}
+	//更详当前其次农作物的状态
+	cols = []string{"state_id", "write_date"}
+	uItem := &IotField{
+		Id:         item.FieldId,
+		StateNowId: utils.NoPlantsCropType,
+		WriteDate:  time.Now(),
+	}
+	errEX = FieldModel.EditFieldByID(uItem, cols)
 	if errEX != errs.Succ {
 		return nil, errEX
 	}
 	cols = []string{"state_id", "write_date"}
 	_, err := utils.GetMysqlClient().
 		Where("field_id=?", item.FieldId).
-		And("state_id!=?", int(utils.FieldFinish)).
+		And("state_id!=?", int(utils.FieldIdle)).
 		Cols(cols...).Update(item)
 	if err != nil {
-		glog.Errorf("Insert the item %+v to table %s failed,err:%+v", *item, t.TableName(), err)
-		return nil, errs.ErrDBInsert
+		glog.Errorf("Update the item %+v to table %s failed,err:%+v", *item, t.TableName(), err)
+		return nil, errs.ErrDBUpdate
 	}
 	return item, errs.Succ
 }
