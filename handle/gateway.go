@@ -136,7 +136,7 @@ func EditGateway(c *gin.Context) {
 		Latitude:  itemDto.Latitude,
 		WriteUid:  itemDto.UserId,
 	}
-	ok, err := model.GatewayModel.UpdateItemByID(&item)
+	_, err := model.GatewayModel.UpdateItemByID(&item)
 	if err != errs.Succ {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
 		return
@@ -150,7 +150,7 @@ func EditGateway(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": ok})
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": true})
 	return
 }
 
@@ -172,7 +172,7 @@ func EditGatewayByUser(c *gin.Context) {
 		Longitude: itemDto.Longitude,
 		Latitude:  itemDto.Latitude,
 	}
-	ok, err := model.GatewayModel.UpdateItemByUser(&item)
+	_, err := model.GatewayModel.UpdateItemByUser(&item)
 	if err != errs.Succ {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
 		return
@@ -186,7 +186,7 @@ func EditGatewayByUser(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": ok})
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": true})
 	return
 }
 
