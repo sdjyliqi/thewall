@@ -18,4 +18,9 @@ var (
 	ErrDBInsert = ErrInfo{41001, errors.New("mysql insert abnormal"), "数据库插入异常", "database insert abnormal"}
 	ErrDBUpdate = ErrInfo{41002, errors.New("mysql update abnormal"), "数据库更新异常", "database update abnormal"}
 	ErrDBDel    = ErrInfo{41003, errors.New("mysql delete abnormal"), "数据库删除异常", "database delete abnormal"}
+
+	//定义生长状态的相关错误
+	ErrPeriodNoPlanting = ErrInfo{42000, errors.New("field-not-idle"), "非耕种状态", "field-not-idle"}
+	ErrPeriodNoHarvest  = ErrInfo{42001, errors.New("field-not-harvest"), "非收割状态", "field-not-harvest"}
+	ErrPeriodNoWeigh    = ErrInfo{42002, errors.New("field-not-weigh"), "非称重状态", "dfield-not-weigh"}
 )
