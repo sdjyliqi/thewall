@@ -19,7 +19,18 @@ type SensorDto struct {
 	GatewayId int     `json:"gateway_id"`
 	Longitude float32 `json:"longitude"`
 	Latitude  float32 `json:"latitude"`
-	Depths    []int   `json:"depths"`
+}
+
+type SensorItemDto struct {
+	Id          int                `json:"id"`
+	UserId      int                `json:"user_id"`
+	Name        string             `json:"name"`
+	Code        string             `json:"code"`
+	FieldName   string             `json:"field_name"`
+	GatewayCode string             `json:"gateway_code"`
+	Longitude   float32            `json:"longitude"`
+	Latitude    float32            `json:"latitude"`
+	Depths      []*model.ProbeItem `json:"depths"`
 }
 
 type SensorGather struct {
@@ -67,6 +78,13 @@ func AddSensor(c *gin.Context) {
 	if bindErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
+	}
+	if item.Code == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	if item.Name == "" {
+		item.Name = item.Code
 	}
 	ok, err := model.SensorModel.AddItem(&item)
 	if err != errs.Succ {
@@ -135,19 +153,40 @@ func GetSensorItemsByUser(c *gin.Context) {
 //GetSensorItem ... 获取Sensor信息
 func GetSensorItem(c *gin.Context) {
 	strId, _ := c.GetQuery("sensor_id")
-	if strId == "" {
+	strUserId, _ := c.GetQuery("user_id")
+	if strId == "" || strUserId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
 	id := utils.Convert2Int(strId)
-	if id <= 0 {
+	userId := utils.Convert2Int(strUserId)
+	if id <= 0 || userId <= 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
-	item, err := model.SensorModel.GetItemByID(id)
+	items, err := model.SensorModel.GetItemsByID(id, userId)
 	if err != errs.Succ {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
 		return
+	}
+	var item *SensorItemDto = nil
+	if len(items) > 0 {
+		item = &SensorItemDto{
+			Id:          items[0].Id,
+			Name:        items[0].Name,
+			Code:        items[0].Code,
+			FieldName:   items[0].FieldName,
+			GatewayCode: items[0].GatewayCode,
+			Longitude:   items[0].Longitude,
+			Latitude:    items[0].Latitude,
+		}
+		for _, v := range items {
+			itemProbe := model.ProbeItem{
+				Code:  v.ProbeCode,
+				Depth: v.ProbeDepth,
+			}
+			item.Depths = append(item.Depths, &itemProbe)
+		}
 	}
 	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": item})
 	return
@@ -197,7 +236,7 @@ func UnbindSensorByUser(c *gin.Context) {
 
 //EditSensorByUser ... APP编辑一条Sensor数据
 func EditSensorByUser(c *gin.Context) {
-	itemDto := SensorDto{}
+	itemDto := SensorItemDto{}
 	bindErr := c.BindJSON(&itemDto)
 	if bindErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
@@ -208,13 +247,27 @@ func EditSensorByUser(c *gin.Context) {
 		return
 	}
 	item := model.IotSensor{
-		Id:     itemDto.Id,
-		UserId: itemDto.UserId,
+		Id:        itemDto.Id,
+		UserId:    itemDto.UserId,
+		Longitude: itemDto.Longitude,
+		Latitude:  itemDto.Latitude,
 	}
 	ok, err := model.SensorModel.UpdateItemByUser(&item)
 	if err != errs.Succ {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
 		return
+	}
+	//更新探针depth
+	for _, v := range itemDto.Depths {
+		itemProbe := model.IotProbe{
+			Code:  v.Code,
+			Depth: v.Depth,
+		}
+		ok, err = model.ProbeModel.UpdateItem(&itemProbe)
+		if err != errs.Succ {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": ok})

@@ -23,7 +23,7 @@ func Test_IotSensorGetItemsByUser(t *testing.T) {
 }
 
 func Test_GetItemByID(t *testing.T) {
-	item, err := SensorModel.GetItemByID(1)
+	item, err := SensorModel.GetItemsByID(4009, 1)
 	t.Log(err)
 	t.Log(item)
 }
