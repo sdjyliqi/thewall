@@ -93,6 +93,6 @@ func LoadTranslateDic() {
 		for _, v := range referenceItems {
 			ReferenceDic[createIdxForReference(v.SoilTypeId, v.CropTypeId)] = v
 		}
-		t = time.Tick(30 * time.Second)
+		t = time.Tick(300 * time.Second)
 	}
 }

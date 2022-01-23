@@ -1,6 +1,7 @@
 package handle
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"thewall/errs"
@@ -67,13 +68,15 @@ func FieldPlanting(c *gin.Context) {
 func FieldHarvest(c *gin.Context) {
 	item := PlantingField{}
 	err := c.BindJSON(&item)
-	if err != nil || item.id <= 0 {
+	if err != nil || item.FieldID <= 0 || item.UserID <= 0 {
+		fmt.Println("aaaaaaaaaaaaa")
 		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
 	//首先判断userid 是否合法
 	existed, chkErr := model.UCModel.ChkUserExisted(item.UserID)
 	if chkErr != errs.Succ {
+		fmt.Println("BBBBBBBBBBBBBBB")
 		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
 		return
 	}
@@ -110,7 +113,7 @@ func FieldHarvest(c *gin.Context) {
 func FieldWeigh(c *gin.Context) {
 	item := PlantingField{}
 	err := c.BindJSON(&item)
-	if err != nil || item.id <= 0 {
+	if err != nil || item.UserID <= 0 || item.FieldID <= 0 || item.Amount < 0 {
 		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
