@@ -147,7 +147,7 @@ func FieldWeigh(c *gin.Context) {
 func FieldEnded(c *gin.Context) {
 	item := PlantingField{}
 	err := c.BindJSON(&item)
-	if err != nil || item.id <= 0 {
+	if err != nil || item.UserID <= 0 || item.FieldID <= 0 {
 		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
@@ -173,11 +173,12 @@ func FieldEnded(c *gin.Context) {
 	}
 
 	//继续判断该土地是否处于结束种植状态或者没有找到记录
-	addItem := &model.IotPlant{
+	editItem := &model.IotPlant{
+		FieldId:   item.FieldID,
 		StateId:   int(utils.FieldIdle),
 		WriteDate: time.Now(),
 	}
-	_, errEX = model.PlantModel.Ended(addItem)
+	_, errEX = model.PlantModel.Ended(editItem)
 	if errEX != errs.Succ {
 		c.JSON(http.StatusOK, gin.H{"code": chkErr.Code, "msg": chkErr.MessageEN, "data": nil})
 		return
