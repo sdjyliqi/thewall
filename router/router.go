@@ -30,7 +30,7 @@ func InitRouter(r *gin.Engine) {
 	r.POST("/field/weigh", handle.FieldWeigh)     //开始称重
 	r.POST("/field/end", handle.FieldEnded)       //终止流程
 
-	r.POST("/field/lines", handle.FieldProbeLines) //查看某土地上的所有probe K线图
+	r.GET("/field/lines", handle.FieldProbeLines) //查看某土地上的所有probe K线图
 	//todo 查找该土地的所有种植的历史记录
 	//tood 称重
 

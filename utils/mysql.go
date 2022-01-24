@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/xorm"
 	"github.com/golang/glog"
@@ -11,21 +10,20 @@ import (
 var mysqlOnce sync.Once
 var msqlEngine *xorm.Engine
 
-//InitMySQL ...初始化mysql，记得要先解密
+//InitMySQL ...初始化mysql连接
 func InitMySQL(addr string, showSQL bool) (*xorm.Engine, error) {
 	var err error
 	mysqlOnce.Do(func() {
 		msqlEngine, err = xorm.NewEngine("mysql", addr)
 		msqlEngine.ShowSQL(showSQL)
 		if err != nil {
-			glog.Fatalf("[init] Initialize mysql client failed,please check the addr:%+v,err:%+v", addr, err)
+			glog.Fatalf("Initialize mysql client failed,err:%+v,please check the addr:%s,", err, addr)
 		}
 	})
-	fmt.Println("Init mysql:", addr, msqlEngine)
 	return msqlEngine, err
 }
 
-//GetMysqlClient ...获取mysql客户端连接
+//GetMysqlClient ...获取mysql客户端连接的方法
 func GetMysqlClient() *xorm.Engine {
 	return msqlEngine
 }

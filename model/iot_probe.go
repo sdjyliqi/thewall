@@ -12,7 +12,7 @@ var ProbeModel IotProbe
 
 type IotProbe struct {
 	Id           int       `json:"id" xorm:"not null pk autoincr INT(11)"`
-	SensorId     int       `json:"sensor_id" xorm:"comment('关联sensor的id') INT(11)"`
+	SensorName   string    `json:"sensor_name" xorm:"comment('关联sensor的id') VARCHAR(128)"`
 	Code         string    `json:"code" xorm:"comment('2000年以后的16进制数') VARCHAR(16)"`
 	ProbeTypeId  int       `json:"probe_type_id" xorm:"comment('Probe Type') INT(11)"`
 	Depth        int       `json:"depth" xorm:"comment('Depth') INT(11)"`
@@ -47,7 +47,7 @@ func (t IotProbe) GetAllItems() ([]*IotProbe, error) {
 //GetProbesByFieldID  ...根据土地ID获取所有的传感器上探针的列表
 func (t IotProbe) GetProbesByFieldID(field int) ([]*ProbeExtend, errs.ErrInfo) {
 	var items []*ProbeExtend
-	jsonCondition := fmt.Sprintf("%s.%s=%s.%s", t.TableName(), "sensor_id", SensorModel.TableName(), "name")
+	jsonCondition := fmt.Sprintf("%s.%s=%s.%s", t.TableName(), "sensor_name", SensorModel.TableName(), "name")
 	whereCondition := fmt.Sprintf("%s.%s=%d", SensorModel.TableName(), "field_id", field)
 	err := utils.GetMysqlClient().Table(t.TableName()).
 		Join("LEFT", SensorModel.TableName(), jsonCondition).
@@ -75,9 +75,9 @@ func (t IotProbe) UpdateItem(item *IotProbe) (bool, errs.ErrInfo) {
 		condition := fmt.Sprintf("code='%s'", item.Code)
 		rows, err = utils.GetMysqlClient().Cols(cols...).Where(condition).Update(updateItem)
 	}
-	if item.SensorId > 0 {
-		rows, err = utils.GetMysqlClient().Cols(cols...).Where("sensor_id=?", item.SensorId).Update(updateItem)
-	}
+	//if item.SensorName != "" {
+	//	rows, err = utils.GetMysqlClient().Cols(cols...).Where("sensor_id=?", item.SensorId).Update(updateItem)
+	//}
 	if err != nil {
 		glog.Errorf("Update the item %+v from %s failed,err:%+v", updateItem, t.TableName(), err)
 		return false, errs.ErrDBUpdate

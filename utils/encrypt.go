@@ -4,7 +4,6 @@ import (
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/hex"
-	"fmt"
 	"github.com/golang/glog"
 )
 
@@ -28,6 +27,5 @@ func EncodingPassword(str string) string {
 	salt := "qpnmPX7PrQWJy88zjA7tbmbhf2WkxFEM"
 	h := md5.New()
 	h.Write([]byte(salt + str))
-	fmt.Println(salt + str)
 	return hex.EncodeToString(h.Sum(nil))
 }

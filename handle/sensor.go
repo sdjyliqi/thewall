@@ -75,17 +75,11 @@ func GetSensorItemsByPage(c *gin.Context) {
 func AddSensor(c *gin.Context) {
 	item := model.IotSensor{}
 	bindErr := c.BindJSON(&item)
-	if bindErr != nil {
+	if bindErr != nil || item.Name == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
-	if item.Code == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
-		return
-	}
-	if item.Name == "" {
-		item.Name = item.Code
-	}
+
 	ok, err := model.SensorModel.AddItem(&item)
 	if err != errs.Succ {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})

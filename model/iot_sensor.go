@@ -12,16 +12,15 @@ import (
 var SensorModel IotSensor
 
 type IotSensor struct {
-	Id              int       `json:"id" xorm:"not null pk autoincr INT(11)"`
-	Name            string    `json:"name" xorm:"comment('Name') VARCHAR(24)"`
-	Code            string    `json:"code" xorm:"comment('2000年以后的16进制数') VARCHAR(16)"`
-	FieldId         int       `json:"field_id" xorm:"comment('农场id') INT(11)"`
-	UserId          int       `json:"user_id" xorm:"INT(11)"`
-	GatewayId       int       `json:"gateway_id" xorm:"comment('gateway_id') INT(11)"`
-	Longitude       float32   `json:"longitude" xorm:"FLOAT"`
-	Latitude        float32   `json:"latitude" xorm:"FLOAT"`
-	LastRecivedTime time.Time `json:"last_recived_time" xorm:"comment('最后上传数据的时间') DATETIME"`
-	WriteDate       time.Time `json:"write_date" xorm:"comment('Last Updated on') DATETIME"`
+	Id           int       `json:"id" xorm:"not null pk autoincr INT(11)"`
+	Name         string    `json:"name" xorm:"comment('Name') VARCHAR(24)"`
+	FieldId      int       `json:"field_id" xorm:"comment('农场id') INT(11)"`
+	UserId       int       `json:"user_id" xorm:"INT(11)"`
+	GatewayId    int       `json:"gateway_id" xorm:"comment('gateway_id') INT(11)"`
+	Longitude    float32   `json:"longitude" xorm:"FLOAT"`
+	Latitude     float32   `json:"latitude" xorm:"FLOAT"`
+	LastReceived time.Time `json:"last_received" xorm:"comment('最后上传数据的时间') DATETIME"`
+	WriteDate    time.Time `json:"write_date" xorm:"comment('Last Updated on') DATETIME"`
 }
 
 //SensorItems ...多表查询
@@ -170,7 +169,7 @@ func (t IotSensor) UpdateItemByUser(item *IotSensor) (bool, errs.ErrInfo) {
 //AddItem ... 添加一条数据
 func (t IotSensor) AddItem(item *IotSensor) (bool, errs.ErrInfo) {
 	item.WriteDate = time.Now()
-	item.LastRecivedTime = time.Now()
+	item.LastReceived = time.Now()
 	rows, err := utils.GetMysqlClient().InsertOne(item)
 	if err != nil {
 		glog.Errorf("Insert item %+v from table %s failed,err:%+v", item, t.TableName(), err)

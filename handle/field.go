@@ -183,27 +183,28 @@ func FieldGetItems(c *gin.Context) {
 //FieldProbeLines ... 获取该田地的所有探针列表，默认是当天的数据
 func FieldProbeLines(c *gin.Context) {
 	type probeLine struct {
-		Name         string `json:"name"`
-		SensorId     string `json:"sensor_id"`
-		Code         string `json:"code"`
-		ProbeType    string `json:"probe_type"`
-		Depth        int    `json:"depth"`
-		LastModified string `json:"last_modified"`
-		Kline        []int  `json:"kline"`
+		Name         string            `json:"name"`
+		SensorId     string            `json:"sensor_id"`
+		Code         string            `json:"code"`
+		ProbeType    string            `json:"probe_type"`
+		Depth        int               `json:"depth"`
+		LastModified string            `json:"last_modified"`
+		Kline        []*model.IotValue `json:"kline"`
 	}
 	type FieldLines struct {
-		code            string       `json:"code" `
+		FieldID         int          `json:"field_id" `
 		Name            string       `json:"name"`
-		ProbeType       string       `json:"probe_type"`
+		CropType        string       `json:"crop_type"`
+		SoilType        string       `json:"soil_type"`
 		LastReceiveData string       `json:"last_receive_data"`
-		Depth           int          `json:"depth"`
 		Longitude       float32      `json:"longitude"`
 		Latitude        float32      `json:"latitude"`
 		ProbeLines      []*probeLine `json:"probe_lines"`
 	}
-	var FieldLinesView FieldLines
+
 	var klines []*probeLine
 
+	probeValueMap := map[string][]*model.IotValue{}
 	strUID, _ := c.GetQuery("user_id")
 	strFID, _ := c.GetQuery("field_id")
 	//判断一下userid是否为空
@@ -216,7 +217,12 @@ func FieldProbeLines(c *gin.Context) {
 	fid := utils.Convert2Int(strFID)
 	//
 	fmt.Println(uid, fid)
-	//todo  实现
+
+	fieldItem, errEX := model.FieldModel.GetItemByID(fid)
+	if errEX != errs.Succ || fieldItem == nil {
+		c.JSON(http.StatusOK, gin.H{"code": errEX.Code, "msg": errEX.MessageEN, "data": nil})
+		return
+	}
 	probeItems, errEX := model.ProbeModel.GetProbesByFieldID(fid)
 	if errEX != errs.Succ {
 		c.JSON(http.StatusOK, gin.H{"code": errEX.Code, "msg": errEX.MessageEN, "data": nil})
@@ -225,9 +231,11 @@ func FieldProbeLines(c *gin.Context) {
 
 	var probeCodes []string
 	for _, v := range probeItems {
+		fmt.Println("AAAAAAAAAAAAAA", v)
+		fmt.Println("v.IotProbe.Code:", v.IotProbe.Code)
+
 		klineNode := &probeLine{
 			Name:         strings.Replace(v.IotProbe.Code, "_", "/", 0),
-			SensorId:     v.IotSensor.Name,
 			Code:         v.IotProbe.Code,
 			ProbeType:    GetProbeTypeByID(v.IotProbe.ProbeTypeId),
 			Depth:        v.IotProbe.Depth,
@@ -237,9 +245,43 @@ func FieldProbeLines(c *gin.Context) {
 		klines = append(klines, klineNode)
 		probeCodes = append(probeCodes, v.IotProbe.Code)
 	}
+	//获取所有探针的固定时间内的value数据
+	fmt.Println("AAAAAAAAAAAAA", probeCodes)
+	valueItems, errEX := model.IotValueModel.GetItemsByCodes(probeCodes, 0, time.Now().Unix())
+	if errEX != errs.Succ {
+		c.JSON(http.StatusOK, gin.H{"code": errEX.Code, "msg": errEX.MessageEN, "data": nil})
+		return
+	}
+	for _, v := range valueItems {
+		probeCode := v.Code
+		lineItems, ok := probeValueMap[probeCode]
+		if !ok {
+			probeValueMap[probeCode] = []*model.IotValue{v}
+			continue
+		}
+		lineItems = append(lineItems, v)
+		probeValueMap[probeCode] = lineItems
+	}
 
-	FieldLinesView.ProbeLines = klines
+	fmt.Println("AAAAAAAAAAAAAAAAAAAA", probeValueMap)
 
-	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": FieldLinesView})
+	for k, v := range klines {
+		klineData, ok := probeValueMap[v.Code]
+		if !ok {
+			continue
+		}
+		klines[k].Kline = klineData
+	}
+	fieldLinesView := FieldLines{
+		FieldID:         fid,
+		Name:            fieldItem.Name,
+		SoilType:        GetSoilTypeByID(fieldItem.SoilTypeId),
+		CropType:        GetCropTypeByID(fieldItem.CropTypeNowId),
+		LastReceiveData: fieldItem.WriteDate.Format(utils.DayCommonFormat),
+		Longitude:       fieldItem.Longitude,
+		Latitude:        fieldItem.Latitude,
+		ProbeLines:      klines,
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": fieldLinesView})
 	return
 }

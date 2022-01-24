@@ -69,8 +69,8 @@ func (t IotValue) GetLineItems(sensorID int, startTS, stopTS int64) ([]*IotValue
 	return items, errs.Succ
 }
 
-//GetLinesByCodes  ...获取某个些探针的在某个时间段内的数据
-func (t IotValue) GetLinesByCodes(probeCodes []int, startTS, stopTS int64) ([]*IotValue, errs.ErrInfo) {
+//GetItemsByCodes  ...获取某个些探针的在某个时间段内的数据
+func (t IotValue) GetItemsByCodes(probeCodes []string, startTS, stopTS int64) ([]*IotValue, errs.ErrInfo) {
 	var items []*IotValue
 	cols := []string{"id", "etl_timestamp", "value"}
 	err := utils.GetMysqlClient().Cols(cols...).
