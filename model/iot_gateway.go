@@ -48,8 +48,10 @@ func (t IotGateway) GetItemByID(id int) (*IotGateway, errs.ErrInfo) {
 	if id <= 0 {
 		return nil, errs.ErrBadRequest
 	}
-	var item *IotGateway
-	_, err := utils.GetMysqlClient().ID(id).Get(item)
+	item := &IotGateway{
+		Id: id,
+	}
+	_, err := utils.GetMysqlClient().Get(item)
 	if err != nil {
 		glog.Errorf("Get the item by id %d from %s failed,err:%+v", id, t.TableName(), err)
 		return nil, errs.ErrDBGet
@@ -62,7 +64,7 @@ func (t IotGateway) GetItemByUser(id, userID int) (*IotGateway, errs.ErrInfo) {
 	if userID <= 0 {
 		return nil, errs.ErrBadRequest
 	}
-	var item *IotGateway
+	item := new(IotGateway)
 	condition := fmt.Sprintf("user_id=%d", userID)
 	_, err := utils.GetMysqlClient().ID(id).And(condition).Get(item)
 	if err != nil {
@@ -77,12 +79,18 @@ func (t IotGateway) UpdateItemByID(item *IotGateway) (bool, errs.ErrInfo) {
 	if item.Id <= 0 || item.WriteUid <= 0 {
 		return false, errs.ErrBadRequest
 	}
-	cols := []string{"longitude", "latitude", "write_uid", "write_date"}
+	cols := []string{"write_uid", "write_date"}
 	updateItem := &IotGateway{
-		Longitude: item.Longitude,
-		Latitude:  item.Latitude,
 		WriteUid:  item.WriteUid,
 		WriteDate: time.Now(),
+	}
+	if item.Longitude > 0 {
+		cols = append(cols, "longitude")
+		updateItem.Longitude = item.Longitude
+	}
+	if item.Latitude > 0 {
+		cols = append(cols, "latitude")
+		updateItem.Latitude = item.Latitude
 	}
 	rows, err := utils.GetMysqlClient().Cols(cols...).ID(item.Id).Update(updateItem)
 	if err != nil {
@@ -97,12 +105,18 @@ func (t IotGateway) UpdateItemByUser(item *IotGateway) (bool, errs.ErrInfo) {
 	if item.Id <= 0 || item.UserId <= 0 {
 		return false, errs.ErrBadRequest
 	}
-	cols := []string{"longitude", "latitude", "write_uid", "write_date"}
+	cols := []string{"write_uid", "write_date"}
 	updateItem := &IotGateway{
-		Longitude: item.Longitude,
-		Latitude:  item.Latitude,
 		WriteUid:  item.UserId,
 		WriteDate: time.Now(),
+	}
+	if item.Longitude > 0 {
+		cols = append(cols, "longitude")
+		updateItem.Longitude = item.Longitude
+	}
+	if item.Latitude > 0 {
+		cols = append(cols, "latitude")
+		updateItem.Latitude = item.Latitude
 	}
 	condition := fmt.Sprintf("user_id=%d", item.UserId)
 	rows, err := utils.GetMysqlClient().Cols(cols...).ID(item.Id).And(condition).Update(updateItem)
@@ -124,7 +138,7 @@ func (t IotGateway) BindItemByUser(code string, userID int) (bool, errs.ErrInfo)
 		WriteUid:  userID,
 		WriteDate: time.Now(),
 	}
-	condition := fmt.Sprintf("code=%s", code)
+	condition := fmt.Sprintf("code='%s'", code)
 	rows, err := utils.GetMysqlClient().Cols(cols...).Where(condition).Update(updateItem)
 	if err != nil {
 		glog.Errorf("Update the item %+v from %s failed,err:%+v", updateItem, t.TableName(), err)
