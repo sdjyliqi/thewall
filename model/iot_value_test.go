@@ -20,6 +20,6 @@ func Test_IotValueGetLinesByCodes(t *testing.T) {
 	items, err := IotValueModel.GetItemsByCodes(ids, 0, time.Now().Unix())
 	assert.Equal(t, err, errs.Succ)
 	for _, v := range items {
-		t.Log(v)
+		t.Log(v.Code)
 	}
 }

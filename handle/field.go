@@ -187,6 +187,7 @@ func FieldProbeLines(c *gin.Context) {
 		Code         string            `json:"code"`
 		ProbeType    string            `json:"probe_type"`
 		Depth        int               `json:"depth"`
+		LastValue    int               `json:"last_value"`
 		LastReceived string            `json:"last_received"`
 		Kline        []*model.IotValue `json:"kline"`
 	}
@@ -230,14 +231,12 @@ func FieldProbeLines(c *gin.Context) {
 
 	var probeCodes []string
 	for _, v := range probeItems {
-		fmt.Println("AAAAAAAAAAAAAA", v)
-		fmt.Println("v.IotProbe.Code:", v.IotProbe.Code)
-
 		klineNode := &probeLine{
 			Name:         strings.Replace(v.IotProbe.Code, "-", "/", 1),
 			Code:         v.IotProbe.Code,
 			ProbeType:    GetProbeTypeByID(v.IotProbe.ProbeTypeId),
 			Depth:        v.IotProbe.Depth,
+			LastValue:    v.IotProbe.LastValue,
 			LastReceived: v.IotProbe.LastReceived.Format(utils.DayCommonFormat),
 			Kline:        nil,
 		}
@@ -245,7 +244,6 @@ func FieldProbeLines(c *gin.Context) {
 		probeCodes = append(probeCodes, v.IotProbe.Code)
 	}
 	//获取所有探针的固定时间内的value数据
-	fmt.Println("AAAAAAAAAAAAA", probeCodes)
 	valueItems, errEX := model.IotValueModel.GetItemsByCodes(probeCodes, 0, time.Now().Unix())
 	if errEX != errs.Succ {
 		c.JSON(http.StatusOK, gin.H{"code": errEX.Code, "msg": errEX.MessageEN, "data": nil})
@@ -253,6 +251,7 @@ func FieldProbeLines(c *gin.Context) {
 	}
 	for _, v := range valueItems {
 		probeCode := v.Code
+		fmt.Println("AAAAAAprobe_codeAAAAAAA", v.Code)
 		lineItems, ok := probeValueMap[probeCode]
 		if !ok {
 			probeValueMap[probeCode] = []*model.IotValue{v}
@@ -263,14 +262,18 @@ func FieldProbeLines(c *gin.Context) {
 	}
 
 	fmt.Println("AAAAAAAAAAAAAAAAAAAA", probeValueMap)
-
+	for k, v := range probeValueMap {
+		fmt.Println("#############value##########", k, v)
+	}
 	for k, v := range klines {
+		fmt.Println("#############Kline##########", k, v)
 		klineData, ok := probeValueMap[v.Code]
 		if !ok {
 			continue
 		}
 		klines[k].Kline = klineData
 	}
+
 	fieldLinesView := FieldLines{
 		FieldID:         fid,
 		Name:            fieldItem.Name,

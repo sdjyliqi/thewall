@@ -31,6 +31,7 @@ func InitRouter(r *gin.Engine) {
 	r.POST("/field/end", handle.FieldEnded)       //终止流程
 
 	r.GET("/field/lines", handle.FieldProbeLines) //查看某土地上的所有probe K线图
+	r.GET("/field/singleline", handle.GetLineItems)
 	//todo 查找该土地的所有种植的历史记录
 	//tood 称重
 
@@ -44,7 +45,7 @@ func InitRouter(r *gin.Engine) {
 	r.POST("/sensor/unbindByUser", handle.UnbindSensorByUser)       //APP用户解绑Sensor
 	r.POST("/sensor/editByUser", handle.EditSensorByUser)           //APP用户修改Sensor信息
 	r.POST("/sensor/gather", handle.GatherData)                     //收集一次上报数据
-	r.GET("/sensor/line", handle.GetLineItems)
+
 	//todo r.GET("/sensor/line", handle.GetLineItems) 数据导出生产csv
 	//todo yanghao   add sensor 方法
 	//雀巢提供api，本服务把数据给数据送过去。

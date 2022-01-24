@@ -84,6 +84,17 @@ func (t IotSensor) GetItemID(id int) (*IotSensor, errs.ErrInfo) {
 	return &item, errs.Succ
 }
 
+//GetItemByName ...根据name获取对应某条记录
+func (t IotSensor) GetItemByName(name string) (*IotSensor, errs.ErrInfo) {
+	item := IotSensor{}
+	_, err := utils.GetMysqlClient().Where("name=?", name).Get(&item)
+	if err != nil {
+		glog.Errorf("Get the item by name %s from %s failed,err:%+v", name, t.TableName(), err)
+		return nil, errs.ErrDBGet
+	}
+	return &item, errs.Succ
+}
+
 //GetItemsByID ...根据ID获取对应的传感器及探针信息
 func (t IotSensor) GetItemsByID(id, userId int) ([]*SensorItems, errs.ErrInfo) {
 	if id <= 0 {

@@ -33,9 +33,11 @@ type SensorItemDto struct {
 	Depths      []*model.ProbeItem `json:"depths"`
 }
 
+//SensorGather ... 传感器的类型
 type SensorGather struct {
-	SensorID     int    `json:"sensor_id"`
-	EtlTimeStamp string `json:"etl_timestamp"`
+	ProbeCode    string `json:"probe_code"`
+	SensorName   string `json:"sensor_name"`
+	EtlTimeStamp int    `json:"etl_timestamp"`
 	Value        int    `json:"value"`
 }
 
@@ -268,8 +270,7 @@ func EditSensorByUser(c *gin.Context) {
 	return
 }
 
-//GatherData ... 添加一个传感器采集的数据
-//todo  probe的类型也在此接收上传，坐标
+//GatherData ... 添加一个传感器采集的数据，记得需要更新某探针的最新的数据和更新时间
 func GatherData(c *gin.Context) {
 	item := SensorGather{}
 	bindErr := c.BindJSON(&item)
@@ -277,22 +278,36 @@ func GatherData(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
-	if item.SensorID <= 0 || item.EtlTimeStamp == "" || item.Value <= 0 {
+	//检查一些非空字段
+	if item.ProbeCode == "" || item.SensorName == "" || item.EtlTimeStamp == 0 || item.Value <= 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
-	sensorItem, errEX := model.SensorModel.GetItemID(item.SensorID)
+	//根据
+	sensorItem, errEX := model.ProbeModel.GetProbesByProbeCode(item.ProbeCode)
 	if errEX != errs.Succ || sensorItem == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": errEX.Code, "msg": errEX.MessageEN, "data": nil})
 		return
 	}
+	//更新探针的最后数据和时间
+	upItem := &model.IotProbe{
+		Code:         item.ProbeCode,
+		LastValue:    item.Value,
+		LastReceived: time.Now(),
+	}
+	upCos := []string{"last_value", "last_received"}
+	errEX = model.ProbeModel.UpdateItemByCols(upItem, upCos)
+	if errEX != errs.Succ || sensorItem == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errEX.Code, "msg": errEX.MessageEN, "data": nil})
+		return
+	}
+	//更新数据，添加到Iot_value 表中
 	value := model.IotValue{
-		EtlTimestamp: utils.Convert2Int(item.EtlTimeStamp),
-		FieldId:      sensorItem.FieldId,
+		EtlTimestamp: item.EtlTimeStamp,
+		FieldId:      sensorItem.IotSensor.FieldId,
 		Value:        item.Value,
-		CreateUid:    0,
 		CreateDate:   time.Now(),
-		WriteUid:     0,
+		Depth:        sensorItem.IotProbe.Depth,
 		WriteDate:    time.Now(),
 	}
 	ok, err := model.IotValueModel.AddItem(&value)
@@ -306,7 +321,7 @@ func GatherData(c *gin.Context) {
 
 //GetLineItems ... 获取Sensor信息
 func GetLineItems(c *gin.Context) {
-	strId, _ := c.GetQuery("sensor_id")
+	strId, _ := c.GetQuery("probe_id")
 	strStart, _ := c.GetQuery("start")
 	strEnd, _ := c.GetQuery("end")
 	if strId == "" {

@@ -72,15 +72,16 @@ func (t IotValue) GetLineItems(sensorID int, startTS, stopTS int64) ([]*IotValue
 //GetItemsByCodes  ...获取某个些探针的在某个时间段内的数据
 func (t IotValue) GetItemsByCodes(probeCodes []string, startTS, stopTS int64) ([]*IotValue, errs.ErrInfo) {
 	var items []*IotValue
-	cols := []string{"id", "etl_timestamp", "value"}
-	err := utils.GetMysqlClient().Cols(cols...).
+	cols := []string{"id", "etl_timestamp", "value", "code", "depth"}
+	err := utils.GetMysqlClient().
+		Cols(cols...).
 		In("code", probeCodes).
 		And("etl_timestamp >=?", startTS).
 		And("etl_timestamp <=?", stopTS).
 		OrderBy("etl_timestamp").
 		Find(&items)
 	if err != nil {
-		glog.Errorf("The the items from %s failed,err:%+v", t.TableName(), err)
+		glog.Errorf("Find the items from %s failed,err:%+v", t.TableName(), err)
 		return nil, errs.ErrDBGet
 	}
 	return items, errs.Succ
