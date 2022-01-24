@@ -3,6 +3,7 @@ package utils
 import "time"
 
 var DayCommonFormat = "20060102"
+var TimeCommonFormat = "20060102 15:04:05"
 
 //GetDaysAgo ... 获取K天前的日期，days 为正数
 func GetDaysAgo(days int) time.Time {

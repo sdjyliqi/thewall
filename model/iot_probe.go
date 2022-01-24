@@ -16,7 +16,7 @@ type IotProbe struct {
 	Code         string    `json:"code" xorm:"comment('2000年以后的16进制数') VARCHAR(16)"`
 	ProbeTypeId  int       `json:"probe_type_id" xorm:"comment('Probe Type') INT(11)"`
 	Depth        int       `json:"depth" xorm:"comment('Depth') INT(11)"`
-	LastModified time.Time `json:"last_modified" xorm:"comment('最后上传数据的时间') DATETIME"`
+	LastReceived time.Time `json:"last_received" xorm:"comment('最后上传数据的时间') DATETIME"`
 }
 
 type ProbeItem struct {

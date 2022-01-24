@@ -184,11 +184,10 @@ func FieldGetItems(c *gin.Context) {
 func FieldProbeLines(c *gin.Context) {
 	type probeLine struct {
 		Name         string            `json:"name"`
-		SensorId     string            `json:"sensor_id"`
 		Code         string            `json:"code"`
 		ProbeType    string            `json:"probe_type"`
 		Depth        int               `json:"depth"`
-		LastModified string            `json:"last_modified"`
+		LastReceived string            `json:"last_received"`
 		Kline        []*model.IotValue `json:"kline"`
 	}
 	type FieldLines struct {
@@ -235,11 +234,11 @@ func FieldProbeLines(c *gin.Context) {
 		fmt.Println("v.IotProbe.Code:", v.IotProbe.Code)
 
 		klineNode := &probeLine{
-			Name:         strings.Replace(v.IotProbe.Code, "_", "/", 0),
+			Name:         strings.Replace(v.IotProbe.Code, "-", "/", 1),
 			Code:         v.IotProbe.Code,
 			ProbeType:    GetProbeTypeByID(v.IotProbe.ProbeTypeId),
 			Depth:        v.IotProbe.Depth,
-			LastModified: v.IotProbe.LastModified.Format(utils.DayCommonFormat),
+			LastReceived: v.IotProbe.LastReceived.Format(utils.DayCommonFormat),
 			Kline:        nil,
 		}
 		klines = append(klines, klineNode)
