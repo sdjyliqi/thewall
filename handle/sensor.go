@@ -322,8 +322,8 @@ func GatherData(c *gin.Context) {
 //GetLineItems ... 获取Sensor信息
 func GetLineItems(c *gin.Context) {
 	strId, _ := c.GetQuery("probe_id")
-	strStart, _ := c.GetQuery("start")
-	strEnd, _ := c.GetQuery("end")
+	strStart, _ := c.GetQuery("start") //开始时间的时间戳
+	strEnd, _ := c.GetQuery("end")     //结束时间的时间戳
 	if strId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return

@@ -213,3 +213,42 @@ func FieldEnded(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": nil})
 	return
 }
+
+//PlantHistory ... 查询某土地的历史耕种信息
+func PlantHistory(c *gin.Context) {
+	type PlantView struct {
+		FieldId      int       `json:"field_id" `
+		CropTypeName string    `json:"crop_type_id" `
+		PlantingDate time.Time `json:"planting_date" `
+		WeighDate    time.Time `json:"weigh_date" `
+		HarvestDate  time.Time `json:"harvest_date" `
+		Amount       float32   `json:"amount" `
+	}
+	var viewItems []*PlantView
+	strFID, _ := c.GetQuery("field_id")
+	//判断一下userid是否为空
+	if strFID == "" {
+		c.JSON(http.StatusOK, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	fid := utils.Convert2Int(strFID)
+	items, errEX := model.PlantModel.GetHistoryPlant(fid)
+	if errEX != errs.Succ {
+		c.JSON(http.StatusOK, gin.H{"code": errEX.Code, "msg": errEX.MessageEN, "data": nil})
+		return
+	}
+	for _, v := range items {
+		vNode := &PlantView{
+			FieldId:      v.FieldId,
+			CropTypeName: GetCropTypeByID(v.CropTypeId),
+			PlantingDate: v.PlantingDate,
+			WeighDate:    v.WeighDate,
+			HarvestDate:  v.HarvestDate,
+			Amount:       v.Amount,
+		}
+		viewItems = append(viewItems, vNode)
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": viewItems})
+	return
+
+}

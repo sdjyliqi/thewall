@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"github.com/golang/glog"
 	"thewall/errs"
 	"thewall/utils"
@@ -37,6 +36,7 @@ func (t IotPlant) Planting(item *IotPlant) (*IotPlant, errs.ErrInfo) {
 	fieldItem := &IotField{
 		Id:            item.FieldId,
 		CropTypeNowId: item.CropTypeId,
+		StateNowId:    int(utils.FieldPlanting),
 		WriteDate:     time.Now(),
 	}
 	cols := []string{"crop_type_now_id", "write_date"}
@@ -60,11 +60,10 @@ func (t IotPlant) Harvest(item *IotPlant) (*IotPlant, errs.ErrInfo) {
 		return nil, errEX
 	}
 	cols = []string{"harvest_date", "state_id", "write_date"}
-	cnt, err := utils.GetMysqlClient().
+	_, err := utils.GetMysqlClient().
 		Where("field_id=?", item.FieldId).
 		And("state_id!=?", int(utils.FieldFinish)).
 		Cols(cols...).Update(item)
-	fmt.Println("=========affect count:", cnt)
 	if err != nil {
 		glog.Errorf("Insert the item %+v to table %s failed,err:%+v", *item, t.TableName(), err)
 		return nil, errs.ErrDBInsert
@@ -101,7 +100,7 @@ func (t IotPlant) Ended(item *IotPlant) (*IotPlant, errs.ErrInfo) {
 	//更新土地的当前状态
 	fieldItem := &IotField{
 		Id:         item.FieldId,
-		StateNowId: int(utils.NoPlantsCropType),
+		StateNowId: int(utils.FieldFinish),
 		WriteDate:  time.Now(),
 	}
 	cols := []string{"write_date", "state_now_id"}
@@ -113,7 +112,7 @@ func (t IotPlant) Ended(item *IotPlant) (*IotPlant, errs.ErrInfo) {
 	cols = []string{"state_id", "write_date"}
 	uItem := &IotField{
 		Id:         item.FieldId,
-		StateNowId: utils.NoPlantsCropType,
+		StateNowId: int(utils.FieldFinish),
 		WriteDate:  time.Now(),
 	}
 	errEX = FieldModel.EditFieldByID(uItem, cols)
@@ -130,4 +129,19 @@ func (t IotPlant) Ended(item *IotPlant) (*IotPlant, errs.ErrInfo) {
 		return nil, errs.ErrDBUpdate
 	}
 	return item, errs.Succ
+}
+
+//GetHistoryPlant  ...获取
+func (t IotPlant) GetHistoryPlant(fieldID int) ([]*IotPlant, errs.ErrInfo) {
+	var items []*IotPlant
+	err := utils.GetMysqlClient().
+		Where("field_id=?", fieldID).
+		And("state_id =?", int(utils.FieldIdle)).
+		OrderBy("planting_date").
+		Find(&items)
+	if err != nil {
+		glog.Errorf("Find the items by field %+v from table %s failed,err:%+v", fieldID, t.TableName(), err)
+		return nil, errs.ErrDBGet
+	}
+	return items, errs.Succ
 }
