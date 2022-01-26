@@ -23,3 +23,11 @@ func Test_IotValueGetLinesByCodes(t *testing.T) {
 		t.Log(v.Code)
 	}
 }
+
+func Test_IotValueGetProbeWithField(t *testing.T) {
+	items, err := IotValueModel.GetProbeWithField("000000000022-01", 0, time.Now().Unix())
+	assert.Equal(t, err, errs.Succ)
+	for _, v := range items {
+		t.Log(v.IotProbe.Code, v.IotField)
+	}
+}

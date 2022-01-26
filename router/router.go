@@ -24,8 +24,8 @@ func InitRouter(r *gin.Engine) {
 	r.POST("/field/end", handle.FieldEnded)               //终止流程
 	r.GET("/field/history", handle.PlantHistory)          //该土地的历史耕种信息
 	r.GET("/field/lines", handle.FieldProbeLines)         //查看某土地上的所有probe K线图
-	r.GET("/field/singleline", handle.GetLineItems)
-	r.POST("/sensor/gather", handle.GatherData) //收集一次上报数据
+	r.GET("/field/singleline", handle.GetSingleLine)      //获取某个探针指定时间区间内的数据
+	r.POST("/sensor/gather", handle.GatherData)           //收集一次上报数据
 
 	//todo 查找该土地的所有种植的历史记录
 	//tood 称重
