@@ -47,7 +47,7 @@ var DefaultConfig = Config{
 	DBMysql:       "thewall:0Thewall!2022@tcp(114.55.139.105:3306)/thewall?charset=utf8mb4",
 	RedisAddr:     "localhost:6379",
 	RedisPassword: "Aa123.",
-	RunPort:       15002,
+	RunPort:       15004,
 }
 
 //127.0.0.1:6379>

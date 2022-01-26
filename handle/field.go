@@ -180,6 +180,56 @@ func FieldGetItems(c *gin.Context) {
 	return
 }
 
+//GetSingleLine ... 获取Sensor信息
+func GetSingleLine(c *gin.Context) {
+	type probeLine struct {
+		Name         string           `json:"name"`
+		Status       string           `json:"name"`
+		ProbeType    string           `json:"probe_type"`
+		Depth        int              `json:"depth"`
+		LastValue    int              `json:"last_value"`
+		LastReceived string           `json:"last_received"`
+		Kline        []model.IotValue `json:"kline"`
+	}
+	var lineItems []model.IotValue
+	probeCode, _ := c.GetQuery("probe_code")
+	strStart, _ := c.GetQuery("start") //开始时间的时间戳
+	strEnd, _ := c.GetQuery("end")     //结束时间的时间戳
+	if probeCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
+		return
+	}
+	startTS, stopTS := utils.Convert2Int64(strStart), utils.Convert2Int64(strEnd)
+
+	items, errEX := model.IotValueModel.GetProbeWithField(probeCode, startTS, stopTS)
+	if errEX != errs.Succ {
+		c.JSON(http.StatusOK, gin.H{"code": errEX.Code, "msg": errEX.MessageEN, "data": nil})
+		return
+	}
+
+	if items == nil {
+		//todo  需要单独查询相关数据
+		c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": items})
+		return
+	}
+
+	for _, v := range items {
+		lineItems = append(lineItems, v.IotValue)
+	}
+
+	singleLine := probeLine{
+		Name:         items[0].IotValue.Code,
+		Status:       "ok", //todo
+		ProbeType:    GetProbeTypeByID(items[0].IotProbe.ProbeTypeId),
+		Depth:        items[0].IotProbe.Depth,
+		LastValue:    items[0].IotProbe.LastValue,
+		LastReceived: items[0].IotProbe.LastReceived.Format(utils.TimeFormat),
+		Kline:        lineItems,
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": singleLine})
+	return
+}
+
 //FieldProbeLines ... 获取该田地的所有探针列表，默认是当天的数据
 func FieldProbeLines(c *gin.Context) {
 	type probeLine struct {

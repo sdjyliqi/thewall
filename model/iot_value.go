@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"github.com/golang/glog"
 	"thewall/errs"
 	"thewall/utils"
@@ -25,6 +26,13 @@ type IotValue struct {
 
 func (t IotValue) TableName() string {
 	return "iot_value"
+}
+
+//探针和农田的关联查询
+type ValueEx struct {
+	IotValue `xorm:"extends"`
+	IotField `xorm:"extends"`
+	IotProbe `xorm:"extends"`
 }
 
 //GetItemsByPage  ...分页获取全量数据
@@ -82,6 +90,25 @@ func (t IotValue) GetItemsByCodes(probeCodes []string, startTS, stopTS int64) ([
 		Find(&items)
 	if err != nil {
 		glog.Errorf("Find the items from %s failed,err:%+v", t.TableName(), err)
+		return nil, errs.ErrDBGet
+	}
+	return items, errs.Succ
+}
+
+//UpdateItemByCols ... 按照probe code更新数据，只修改固定列
+func (t IotValue) GetProbeWithField(probeID string, startTS, stopTS int64) ([]*ValueEx, errs.ErrInfo) {
+	var items []*ValueEx
+	joinCon := fmt.Sprintf("%s.field_id=%s.id", t.TableName(), FieldModel.TableName())
+	whereCon := fmt.Sprintf("%s.code='%s'", t.TableName(), probeID)
+	err := utils.GetMysqlClient().Table(t.TableName()).
+		Join("LEFT", FieldModel.TableName(), joinCon).
+		Join("LEFT", ProbeModel.TableName(), "iot_value.code=iot_probe.code").
+		Where(whereCon).
+		And("etl_timestamp >=?", startTS).
+		And("etl_timestamp <=?", stopTS).
+		Find(&items)
+	if err != nil {
+		glog.Errorf("Get the item by probe code %s from %s failed,err:%+v", probeID, t.TableName(), err)
 		return nil, errs.ErrDBGet
 	}
 	return items, errs.Succ
