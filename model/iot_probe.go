@@ -21,8 +21,9 @@ type IotProbe struct {
 }
 
 type ProbeItem struct {
-	Code  string `json:"code"`
-	Depth int    `json:"depth"`
+	Code        string `json:"code"`
+	ProbeTypeId int    `json:"probe_type_id"`
+	Depth       int    `json:"depth"`
 }
 
 type ProbeExtend struct {
@@ -75,6 +76,16 @@ func (t IotProbe) GetProbesByProbeCode(code string) (*ProbeExtend, errs.ErrInfo)
 		return nil, errs.ErrDBGet
 	}
 	return &item, errs.Succ
+}
+
+//AddItem ... 添加一条数据
+func (t IotProbe) AddItem(item *IotProbe) (*IotProbe, errs.ErrInfo) {
+	_, err := utils.GetMysqlClient().InsertOne(item)
+	if err != nil {
+		glog.Errorf("Insert item %+v from table %s failed,err:%+v", item, t.TableName(), err)
+		return nil, errs.ErrDBInsert
+	}
+	return item, errs.Succ
 }
 
 //UpdateItem ... 更新数据Depth

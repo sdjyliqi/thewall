@@ -37,10 +37,10 @@ func InitRouter(r *gin.Engine) {
 
 	r.GET("/sensor/itemsByPage", handle.GetSensorItemsByPage)       //后台分页获取Sensor列表
 	r.POST("/sensor/add", handle.AddSensor)                         //后台添加Sensor
-	r.GET("/sensor/itemsByField", handle.GetSensorItemsByField)     //获取绑定Field的传感器列表
-	r.GET("/sensor/itemsByGateway", handle.GetSensorItemsByGateway) //获取绑定Gateway的传感器列表
-	r.GET("/sensor/itemsByUser", handle.GetSensorItemsByUser)       //获取用户绑定的Sensor列表
-	r.GET("/sensor/item", handle.GetSensorItem)                     //获取Sensor信息
+	r.GET("/sensor/itemsByField", handle.GetSensorItemsByField)     //APP获取绑定Field的传感器列表
+	r.GET("/sensor/itemsByGateway", handle.GetSensorItemsByGateway) //APP获取绑定Gateway的传感器列表
+	r.GET("/sensor/itemsByUser", handle.GetSensorItemsByUser)       //APP获取用户绑定的Sensor列表
+	r.GET("/sensor/item", handle.GetSensorItem)                     //APP获取Sensor信息
 	r.POST("/sensor/bindByUser", handle.BindSensorByUser)           //APP用户绑定Sensor
 	r.POST("/sensor/unbindByUser", handle.UnbindSensorByUser)       //APP用户解绑Sensor
 	r.POST("/sensor/editByUser", handle.EditSensorByUser)           //APP用户修改Sensor信息
@@ -51,6 +51,8 @@ func InitRouter(r *gin.Engine) {
 	//雀巢提供api，本服务把数据给数据送过去。
 
 	//查询某个区间的数据
+
+	r.GET("/probe/type/items", handle.GetProbeTypeAllItems) //后台获取探针类型列表
 
 	r.GET("/gateway/itemsByPage", handle.GetGatewayItemsByPage) //后台分页获取Gateway列表
 	r.GET("/gateway/item", handle.GetGatewayItem)               //后台获取Gateway信息

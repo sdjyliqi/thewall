@@ -27,12 +27,13 @@ type IotSensor struct {
 type SensorItems struct {
 	Id          int     `json:"id"`
 	Name        string  `json:"name"`
-	Code        string  `json:"code"`
+	UserId      int     `json:"user_id"`
 	Longitude   float32 `json:"longitude"`
 	Latitude    float32 `json:"latitude"`
 	FieldName   string  `json:"field_name"`
 	GatewayCode string  `json:"gateway_code"`
 	ProbeCode   string  `json:"probe_code"`
+	ProbeTypeId int     `json:"probe_type_id"`
 	ProbeDepth  int     `json:"probe_depth"`
 }
 
@@ -101,11 +102,11 @@ func (t IotSensor) GetItemsByID(id, userId int) ([]*SensorItems, errs.ErrInfo) {
 		return nil, errs.ErrBadRequest
 	}
 	var items []*SensorItems
-	joinSelect := fmt.Sprintf("%s.id,%s.name,%s.code,%s.longitude,%s.latitude,%s.name as field_name,%s.code as gateway_code,%s.code as probe_code,%s.depth as probe_depth",
-		t.TableName(), t.TableName(), t.TableName(), t.TableName(), t.TableName(), FieldModel.TableName(), GatewayModel.TableName(), ProbeModel.TableName(), ProbeModel.TableName())
+	joinSelect := fmt.Sprintf("%s.id,%s.name,%s.user_id,%s.longitude,%s.latitude,%s.name as field_name,%s.code as gateway_code,%s.code as probe_code,%s.probe_type_id,%s.depth as probe_depth",
+		t.TableName(), t.TableName(), t.TableName(), t.TableName(), t.TableName(), FieldModel.TableName(), GatewayModel.TableName(), ProbeModel.TableName(), ProbeModel.TableName(), ProbeModel.TableName())
 	joinField := fmt.Sprintf("%s.field_id=%s.id", t.TableName(), FieldModel.TableName())
 	joinGateway := fmt.Sprintf("%s.gateway_id=%s.id", t.TableName(), GatewayModel.TableName())
-	joinProbe := fmt.Sprintf("%s.id=%s.sensor_id", t.TableName(), ProbeModel.TableName())
+	joinProbe := fmt.Sprintf("%s.name=%s.sensor_name", t.TableName(), ProbeModel.TableName())
 	condition := fmt.Sprintf("%s.id=%d and %s.user_id=%d", t.TableName(), id, t.TableName(), userId)
 	err := utils.GetMysqlClient().Table(t.TableName()).Select(joinSelect).
 		Join("LEFT", FieldModel.TableName(), joinField).
@@ -178,15 +179,13 @@ func (t IotSensor) UpdateItemByUser(item *IotSensor) (bool, errs.ErrInfo) {
 }
 
 //AddItem ... 添加一条数据
-func (t IotSensor) AddItem(item *IotSensor) (bool, errs.ErrInfo) {
-	item.WriteDate = time.Now()
-	item.LastReceived = time.Now()
-	rows, err := utils.GetMysqlClient().InsertOne(item)
+func (t IotSensor) AddItem(item *IotSensor) (*IotSensor, errs.ErrInfo) {
+	_, err := utils.GetMysqlClient().InsertOne(item)
 	if err != nil {
 		glog.Errorf("Insert item %+v from table %s failed,err:%+v", item, t.TableName(), err)
-		return false, errs.ErrDBInsert
+		return nil, errs.ErrDBInsert
 	}
-	return rows > 0, errs.Succ
+	return item, errs.Succ
 }
 
 //SensorBindFiled ...重新绑定某地的传感器
@@ -251,7 +250,7 @@ func (t IotSensor) BindItemByUser(code string, userID int) (bool, errs.ErrInfo) 
 		UserId:    userID,
 		WriteDate: time.Now(),
 	}
-	condition := fmt.Sprintf("code=%s", code)
+	condition := fmt.Sprintf("name='%s'", code)
 	rows, err := utils.GetMysqlClient().Cols(cols...).Where(condition).Update(updateItem)
 	if err != nil {
 		glog.Errorf("Update the item %+v from %s failed,err:%+v", updateItem, t.TableName(), err)

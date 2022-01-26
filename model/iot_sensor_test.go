@@ -29,7 +29,7 @@ func Test_IotSensorGetItemByID(t *testing.T) {
 }
 
 func Test_IotSensorGetItemByName(t *testing.T) {
-	item, err := SensorModel.GetItemByName("000000000022")
+	item, err := SensorModel.GetItemByName("20220126000001")
 	t.Log(err)
 	t.Log(item)
 }

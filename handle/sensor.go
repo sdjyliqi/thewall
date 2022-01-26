@@ -11,26 +11,25 @@ import (
 )
 
 type SensorDto struct {
-	Id        int     `json:"id"`
-	Name      string  `json:"name"`
-	Code      string  `json:"code"`
-	FieldId   int     `json:"field_id"`
-	UserId    int     `json:"user_id"`
-	GatewayId int     `json:"gateway_id"`
-	Longitude float32 `json:"longitude"`
-	Latitude  float32 `json:"latitude"`
+	Id        int                `json:"id"`
+	Name      string             `json:"name"`
+	FieldId   int                `json:"field_id"`
+	UserId    int                `json:"user_id"`
+	GatewayId int                `json:"gateway_id"`
+	Longitude float32            `json:"longitude"`
+	Latitude  float32            `json:"latitude"`
+	Probes    []*model.ProbeItem `json:"probes"`
 }
 
 type SensorItemDto struct {
 	Id          int                `json:"id"`
 	UserId      int                `json:"user_id"`
 	Name        string             `json:"name"`
-	Code        string             `json:"code"`
 	FieldName   string             `json:"field_name"`
 	GatewayCode string             `json:"gateway_code"`
 	Longitude   float32            `json:"longitude"`
 	Latitude    float32            `json:"latitude"`
-	Depths      []*model.ProbeItem `json:"depths"`
+	Probes      []*model.ProbeItem `json:"probes"`
 }
 
 //SensorGather ... 传感器的类型
@@ -75,19 +74,42 @@ func GetSensorItemsByPage(c *gin.Context) {
 
 //AddSensor ... 添加一条Sensor数据
 func AddSensor(c *gin.Context) {
-	item := model.IotSensor{}
-	bindErr := c.BindJSON(&item)
-	if bindErr != nil || item.Name == "" {
+	itemDto := SensorDto{}
+	bindErr := c.BindJSON(&itemDto)
+	if bindErr != nil || itemDto.Name == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
-
-	ok, err := model.SensorModel.AddItem(&item)
+	item := model.IotSensor{
+		Name:      itemDto.Name,
+		FieldId:   itemDto.FieldId,
+		UserId:    itemDto.UserId,
+		GatewayId: itemDto.GatewayId,
+		Longitude: itemDto.Longitude,
+		Latitude:  itemDto.Latitude,
+		WriteDate: time.Now(),
+	}
+	data, err := model.SensorModel.AddItem(&item)
 	if err != errs.Succ {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": ok})
+
+	for index, v := range itemDto.Probes {
+		itemProbe := model.IotProbe{
+			SensorName:  data.Name,
+			Code:        data.Name + "-" + strconv.Itoa(index+1),
+			ProbeTypeId: v.ProbeTypeId,
+			Depth:       v.Depth,
+		}
+		_, err = model.ProbeModel.AddItem(&itemProbe)
+		if err != errs.Succ {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": data.Id})
 	return
 }
 
@@ -170,7 +192,7 @@ func GetSensorItem(c *gin.Context) {
 		item = &SensorItemDto{
 			Id:          items[0].Id,
 			Name:        items[0].Name,
-			Code:        items[0].Code,
+			UserId:      items[0].UserId,
 			FieldName:   items[0].FieldName,
 			GatewayCode: items[0].GatewayCode,
 			Longitude:   items[0].Longitude,
@@ -178,10 +200,11 @@ func GetSensorItem(c *gin.Context) {
 		}
 		for _, v := range items {
 			itemProbe := model.ProbeItem{
-				Code:  v.ProbeCode,
-				Depth: v.ProbeDepth,
+				Code:        v.ProbeCode,
+				ProbeTypeId: v.ProbeTypeId,
+				Depth:       v.ProbeDepth,
 			}
-			item.Depths = append(item.Depths, &itemProbe)
+			item.Probes = append(item.Probes, &itemProbe)
 		}
 	}
 	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": item})
@@ -196,11 +219,11 @@ func BindSensorByUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
-	if itemDto.Code == "" || itemDto.UserId <= 0 {
+	if itemDto.Name == "" || itemDto.UserId <= 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"code": errs.ErrBadRequest.Code, "msg": errs.ErrBadRequest.MessageEN, "data": nil})
 		return
 	}
-	ok, err := model.SensorModel.BindItemByUser(itemDto.Code, itemDto.UserId)
+	ok, err := model.SensorModel.BindItemByUser(itemDto.Name, itemDto.UserId)
 	if err != errs.Succ {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": err.Code, "msg": err.MessageEN, "data": nil})
 		return
@@ -254,7 +277,7 @@ func EditSensorByUser(c *gin.Context) {
 		return
 	}
 	//更新探针depth
-	for _, v := range itemDto.Depths {
+	for _, v := range itemDto.Probes {
 		itemProbe := model.IotProbe{
 			Code:  v.Code,
 			Depth: v.Depth,
@@ -336,5 +359,28 @@ func GetLineItems(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": items})
+	return
+}
+
+//GetProbeTypeAllItems ... 获取probe_type全量数据
+func GetProbeTypeAllItems(c *gin.Context) {
+	type ProbeTypeShort struct {
+		Id   int    `json:"id" "`
+		Name string `json:"name" "`
+	}
+	var showItmes []*ProbeTypeShort
+	items, err := model.ProbeTypeModel.GetAllItems()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "msg": err.Error(), "data": nil})
+		return
+	}
+	for _, v := range items {
+		node := &ProbeTypeShort{
+			Id:   v.Id,
+			Name: v.Name,
+		}
+		showItmes = append(showItmes, node)
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "succ", "data": showItmes})
 	return
 }
