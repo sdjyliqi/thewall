@@ -219,7 +219,7 @@ func GetSingleLine(c *gin.Context) {
 
 	singleLine := probeLine{
 		Name:         items[0].IotValue.Code,
-		Status:       "ok", //todo
+		Status:       "ok", //
 		ProbeType:    GetProbeTypeByID(items[0].IotProbe.ProbeTypeId),
 		Depth:        items[0].IotProbe.Depth,
 		LastValue:    items[0].IotProbe.LastValue,
